@@ -920,8 +920,10 @@
         }
         createParticles();
 
-        // API Configuration
-        const API_URL = 'http://localhost:5000/api';
+        // ============================================
+        // API Configuration - UPDATED FOR RENDER BACKEND
+        // ============================================
+        const API_URL = 'https://life-gap-fixer06.onrender.com/api';
 
         // Theme Toggle
         const themeToggle = document.getElementById('themeToggle');
@@ -1049,7 +1051,9 @@
             registerBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Creating account...';
             
             try {
-                // Make API call to backend
+                console.log('Registering user:', userData.email);
+                
+                // Make API call to Render backend
                 const response = await fetch(`${API_URL}/auth/register`, {
                     method: 'POST',
                     headers: {
@@ -1059,8 +1063,9 @@
                 });
                 
                 const data = await response.json();
+                console.log('Server response:', data);
                 
-                if (response.ok) {
+                if (response.ok && data.success) {
                     // Registration successful
                     showAlert('✅ Registration successful! Redirecting to dashboard...', 'success');
                     
@@ -1087,9 +1092,9 @@
             } catch (error) {
                 console.error('Registration error:', error);
                 
-                // Check if backend is running
+                // Check if backend is reachable
                 if (error.message.includes('Failed to fetch')) {
-                    showAlert('Cannot connect to server. Please make sure the backend is running on port 5000.', 'error');
+                    showAlert('Cannot connect to server. Please check if backend is running.', 'error');
                 } else {
                     showAlert('Network error. Please try again.', 'error');
                 }
