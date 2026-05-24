@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Life Gap Fixer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-gradient-start: #f8fafc;
+            --bg-gradient-end: #e2e8f0;
+            --surface-glass: rgba(255, 255, 255, 0.65);
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --accent: #7c3aed;
+            --accent-soft: rgba(124, 58, 237, 0.12);
+            --accent-2: #2563eb;
+            --border-light: rgba(0, 0, 0, 0.08);
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --btn-secondary-bg: rgba(0, 0, 0, 0.04);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        body.dark {
+            --bg-gradient-start: #0f172a;
+            --bg-gradient-end: #020617;
+            --surface-glass: rgba(15, 23, 42, 0.65);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent: #8b5cf6;
+            --accent-2: #38bdf8;
+            --border-light: rgba(255, 255, 255, 0.08);
+            --card-bg: rgba(15, 23, 42, 0.7);
+            --btn-secondary-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-primary);
+            transition: all 0.4s;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .particle { position: absolute; background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-radius: 50%; opacity: 0; animation: particleFloat linear infinite; }
+        @keyframes particleFloat { 0% { transform: translateY(100vh) rotate(0deg); opacity: 0; } 20% { opacity: 0.1; } 80% { opacity: 0.1; } 100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; } }
+        .orb-1, .orb-2 { position: fixed; border-radius: 50%; filter: blur(60px); opacity: 0.3; pointer-events: none; animation: orbFloat 20s infinite alternate; }
+        .orb-1 { width: 300px; height: 300px; background: radial-gradient(circle, var(--accent), transparent); top: -100px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, var(--accent-2), transparent); bottom: -150px; right: -150px; animation-delay: -5s; }
+        @keyframes orbFloat { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(5%, 5%) scale(1.1); } }
+
+        .page-shell { position: relative; z-index: 2; width: min(1400px, calc(100% - 2.5rem)); margin: 0 auto; padding: 1.5rem 0 3rem; }
+        
+        /* Premium Header - Marketplace Style */
+        .site-header {
+            position: sticky; top: 1.2rem; z-index: 100; display: flex; align-items: center;
+            justify-content: space-between; gap: 1.5rem; padding: 0.7rem 2rem; margin-bottom: 2rem;
+            border-radius: 3rem; background: var(--surface-glass); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .logo { font-size: 1.45rem; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent-2)); background-clip: text; -webkit-background-clip: text; color: transparent; text-decoration: none; transition: all 0.3s; }
+        .logo:hover { transform: scale(1.02); letter-spacing: 1px; }
+
+        .main-nav { display: flex; flex-wrap: wrap; gap: 0.25rem; background: rgba(0, 0, 0, 0.02); padding: 0.25rem; border-radius: 3rem; }
+        .main-nav a { padding: 0.6rem 1.3rem; color: var(--text-secondary); font-weight: 600; font-size: 0.9rem; border-radius: 2rem; transition: all 0.3s; text-decoration: none; cursor: pointer; position: relative; }
+        .main-nav a::after { content: ''; position: absolute; bottom: 0; left: 50%; width: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: all 0.3s; transform: translateX(-50%); }
+        .main-nav a:hover::after { width: 60%; }
+        .main-nav a:hover { background: var(--accent-soft); color: var(--accent); transform: translateY(-2px); }
+
+        /* Marketplace Style Profile Dropdown - Flipkart/TaskRabbit Inspired */
+        .profile-dropdown { position: relative; }
+        .profile-trigger { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.5rem 1rem; border-radius: 2rem; transition: all 0.3s; background: var(--accent-soft); border: 1px solid transparent; }
+        .profile-trigger:hover { background: var(--accent); }
+        .profile-trigger:hover .profile-name, .profile-trigger:hover .profile-icon, .profile-trigger:hover .avatar-small { color: white; }
+        .avatar-small { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1rem; background-size: cover; background-position: center; overflow: hidden; }
+        .profile-name { font-weight: 600; color: var(--text-primary); font-size: 0.9rem; }
+        .profile-icon { color: var(--text-muted); font-size: 0.8rem; transition: transform 0.3s; }
+        .profile-dropdown.active .profile-icon { transform: rotate(180deg); }
+        .dropdown-menu { position: absolute; top: calc(100% + 10px); right: 0; width: 280px; background: white; border-radius: 1rem; border: 1px solid #e2e8f0; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1); z-index: 1000; }
+        body.dark .dropdown-menu { background: #1e293b; border-color: #334155; }
+        .profile-dropdown.active .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+        .dropdown-header { padding: 1rem; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 0.75rem; }
+        body.dark .dropdown-header { border-bottom-color: #334155; }
+        .dropdown-avatar { width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.2rem; background-size: cover; background-position: center; }
+        .dropdown-user-info { flex: 1; }
+        .dropdown-user-name { font-weight: 700; color: var(--text-primary); margin-bottom: 0.2rem; }
+        .dropdown-user-email { font-size: 0.75rem; color: var(--text-muted); }
+        .dropdown-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: var(--text-secondary); transition: all 0.3s; cursor: pointer; }
+        .dropdown-item:hover { background: var(--accent-soft); color: var(--accent); }
+        .dropdown-item i { width: 20px; font-size: 1rem; }
+        .dropdown-divider { height: 1px; background: #e2e8f0; margin: 0.5rem 0; }
+        body.dark .dropdown-divider { background: #334155; }
+        .logout-item { color: var(--danger); }
+        .logout-item:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+        .theme-toggle { background: var(--surface-glass); backdrop-filter: blur(12px); border: 1px solid var(--border-light); border-radius: 3rem; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; transition: all 0.4s; font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); position: relative; overflow: hidden; }
+        .theme-toggle::before { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: radial-gradient(circle, var(--accent-soft), transparent); border-radius: 50%; transform: translate(-50%, -50%); transition: width 0.6s, height 0.6s; }
+        .theme-toggle:hover::before { width: 200px; height: 200px; }
+        .theme-toggle svg { width: 20px; height: 20px; transition: transform 0.5s; }
+        .theme-toggle:hover svg { transform: rotate(180deg); }
+
+        .dashboard-container { padding: 1rem 0; }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .dashboard-header h1 { font-size: 1.8rem; background: linear-gradient(135deg, var(--text-primary), var(--accent)); background-clip: text; -webkit-background-clip: text; color: transparent; }
+
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 1.5rem; padding: 1.5rem; text-align: center; border: 1px solid var(--border-light); transition: all 0.4s; opacity: 0; transform: translateY(20px); animation: cardReveal 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.2) forwards; position: relative; overflow: hidden; }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); background-size: 200% 100%; animation: borderFlow 3s ease infinite; opacity: 0; transition: opacity 0.3s; }
+        .stat-card:hover::before { opacity: 1; }
+        .stat-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 20px 30px -12px rgba(124, 58, 237, 0.2); }
+        @keyframes borderFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes cardReveal { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .stat-card h3 { font-size: 2rem; color: var(--accent); margin-bottom: 0.5rem; }
+        .stat-card p { color: var(--text-muted); font-size: 0.85rem; }
+
+        /* Marketplace Table Styles */
+        .section { margin-bottom: 2.5rem; opacity: 0; transform: translateY(30px); transition: all 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.2); }
+        .section.visible { opacity: 1; transform: translateY(0); }
+        .section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+        .section-title h2 { font-size: 1.4rem; color: var(--accent); position: relative; display: inline-block; }
+        .section-title h2::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width 0.4s; }
+        .section.visible .section-title h2::after { width: 100%; }
+        .search-box { padding: 0.5rem 1rem; border-radius: 2rem; border: 1px solid var(--border-light); background: var(--btn-secondary-bg); color: var(--text-primary); width: 250px; transition: all 0.3s; }
+        .search-box:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); transform: translateY(-2px); }
+        .table-container { overflow-x: auto; background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 1.5rem; padding: 1rem; border: 1px solid var(--border-light); transition: all 0.3s; }
+        .table-container:hover { border-color: var(--accent); box-shadow: 0 8px 25px -8px rgba(124, 58, 237, 0.15); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border-light); }
+        th { font-weight: 700; color: var(--accent); background: var(--accent-soft); }
+        tr { transition: all 0.3s; }
+        tr:hover { background: var(--accent-soft); transform: translateX(2px); }
+        .status-badge, .role-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; }
+        .status-pending { background: var(--warning); color: #fff; }
+        .status-accepted { background: var(--info); color: #fff; }
+        .status-in_progress { background: var(--accent); color: #fff; }
+        .status-completed { background: var(--success); color: #fff; }
+        .role-user { background: var(--info); color: #fff; }
+        .role-helper { background: var(--success); color: #fff; }
+        .role-admin { background: var(--danger); color: #fff; }
+
+        .btn { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.7rem 1.5rem; border-radius: 2rem; font-weight: 600; transition: all 0.3s; cursor: pointer; border: none; font-size: 0.9rem; position: relative; overflow: hidden; }
+        .btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent); transition: left 0.5s; }
+        .btn:hover::before { left: 100%; }
+        .btn-primary { background: linear-gradient(125deg, var(--accent), var(--accent-2)); color: white; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4); }
+        .btn-sm { padding: 0.4rem 1rem; font-size: 0.8rem; }
+
+        /* Modals */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); z-index: 1001; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 1.5rem; padding: 2rem; max-width: 450px; width: 90%; text-align: center; animation: modalPop 0.3s ease; }
+        body.dark .modal-content { background: #1e293b; }
+        @keyframes modalPop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .modal-actions { display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; }
+        .form-group { margin-bottom: 1rem; text-align: left; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-secondary); }
+        .form-group input { width: 100%; padding: 0.8rem; border-radius: 0.8rem; border: 1px solid #e2e8f0; background: #f8fafc; color: var(--text-primary); }
+        body.dark .form-group input { border-color: #334155; background: #0f172a; }
+        .avatar-preview { width: 80px; height: 80px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2rem; color: white; cursor: pointer; background-size: cover; background-position: center; }
+        .alert { padding: 1rem; border-radius: 1rem; margin-bottom: 1rem; display: none; }
+        .alert.show { display: block; animation: slideDown 0.3s ease; }
+        .alert-success { background: rgba(16, 185, 129, 0.2); border: 1px solid var(--success); color: var(--success); }
+        .alert-error { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); color: var(--danger); }
+
+        @media (max-width: 768px) {
+            .site-header { flex-wrap: wrap; }
+            .main-nav { order: 2; width: auto; justify-content: center; }
+            .profile-dropdown { order: 3; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            th, td { font-size: 0.8rem; padding: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="orb-1"></div>
+    <div class="orb-2"></div>
+
+    <div class="page-shell">
+        <header class="site-header">
+            <a class="logo" href="index.html">✨ Life Gap Fixer | Admin</a>
+            <nav class="main-nav">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="services.html">Services</a>
+            </nav>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <!-- Premium Profile Dropdown -->
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="profile-trigger" id="profileTrigger">
+                        <div class="avatar-small" id="navAvatar"><i class="fas fa-user-shield"></i></div>
+                        <span class="profile-name" id="navUserName">Admin</span>
+                        <i class="fas fa-chevron-down profile-icon"></i>
+                    </div>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-header">
+                            <div class="dropdown-avatar" id="dropdownAvatar"><i class="fas fa-user-shield"></i></div>
+                            <div class="dropdown-user-info">
+                                <div class="dropdown-user-name" id="dropdownUserName">Admin</div>
+                                <div class="dropdown-user-email" id="dropdownUserEmail">admin@example.com</div>
+                            </div>
+                        </div>
+                        <div class="dropdown-item" id="editProfileBtn"><i class="fas fa-user-edit"></i> Your Profile</div>
+                        <div class="dropdown-item" id="changePasswordBtn"><i class="fas fa-key"></i> Change Password</div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item" onclick="window.location.href='#usersSection'"><i class="fas fa-users"></i> Manage Users</div>
+                        <div class="dropdown-item" onclick="window.location.href='#helpersSection'"><i class="fas fa-tools"></i> Manage Helpers</div>
+                        <div class="dropdown-item" onclick="window.location.href='#tasksSection'"><i class="fas fa-tasks"></i> All Tasks</div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item logout-item" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</div>
+                    </div>
+                </div>
+                <div class="theme-toggle" id="themeToggle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line></svg>
+                    <span>Dark/Light</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
+            <div class="dashboard-header"><h1>👑 Admin Dashboard</h1></div>
+            <div id="alert" class="alert"></div>
+
+            <div class="stats-grid">
+                <div class="stat-card"><h3 id="totalUsers">0</h3><p>Total Users</p></div>
+                <div class="stat-card"><h3 id="totalHelpers">0</h3><p>Total Helpers</p></div>
+                <div class="stat-card"><h3 id="totalTasks">0</h3><p>Total Tasks</p></div>
+                <div class="stat-card"><h3 id="pendingTasks">0</h3><p>Pending Tasks</p></div>
+                <div class="stat-card"><h3 id="completedTasks">0</h3><p>Completed Tasks</p></div>
+                <div class="stat-card"><h3 id="totalReviews">0</h3><p>Total Reviews</p></div>
+            </div>
+
+            <div class="section" id="usersSection"><div class="section-title"><h2>👥 All Users</h2><input type="text" id="searchUsers" placeholder="🔍 Search users..." class="search-box" onkeyup="filterUsers()"></div><div class="table-container"><table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="usersTableBody"><tr><td colspan="8">Loading...</td></tr></tbody></table></div></div>
+            <div class="section" id="helpersSection"><div class="section-title"><h2>🛠️ All Helpers</h2><input type="text" id="searchHelpers" placeholder="🔍 Search helpers..." class="search-box" onkeyup="filterHelpers()"></div><div class="table-container"><table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Location</th><th>Skills</th><th>Hourly Rate</th><th>Rating</th><th>Actions</th></tr></thead><tbody id="helpersTableBody"><tr><td colspan="9">Loading...</td></tr></tbody></table></div></div>
+            <div class="section" id="tasksSection"><div class="section-title"><h2>📋 All Tasks</h2><div style="display: flex; gap: 0.5rem; flex-wrap: wrap;"><select id="taskStatusFilter" onchange="filterTasks()" class="search-box" style="width: auto;"><option value="all">All Status</option><option value="pending">Pending</option><option value="accepted">Accepted</option><option value="in_progress">In Progress</option><option value="completed">Completed</option></select><input type="text" id="searchTasks" placeholder="🔍 Search tasks..." class="search-box" onkeyup="filterTasks()"></div></div><div class="table-container"><table><thead><tr><th>ID</th><th>Title</th><th>User</th><th>Helper</th><th>Budget</th><th>Status</th><th>Created</th></tr></thead><tbody id="tasksTableBody"><tr><td colspan="7">Loading...</td></tr></tbody></table></div></div>
+            <div class="section" id="reviewsSection"><div class="section-title"><h2>⭐ All Reviews</h2></div><div class="table-container"><table><thead><tr><th>ID</th><th>Task</th><th>Reviewer</th><th>Reviewee</th><th>Rating</th><th>Comment</th><th>Date</th></tr></thead><tbody id="reviewsTableBody"><tr><td colspan="7">Loading...</td></tr></tbody></table></div></div>
+        </div>
+
+        <!-- Edit Profile Modal -->
+        <div id="editProfileModal" class="modal"><div class="modal-content"><div class="avatar-preview" id="adminAvatarPreview" onclick="document.getElementById('adminAvatarInput').click()"><i class="fas fa-camera"></i></div><input type="file" id="adminAvatarInput" style="display:none" accept="image/jpeg,image/png"><h3>Edit Profile</h3><form id="editProfileForm"><div class="form-group"><label>Full Name</label><input type="text" id="adminFullName" required></div><div class="form-group"><label>Email</label><input type="email" id="adminEmail" required></div><div class="form-group"><label>Phone</label><input type="tel" id="adminPhone"></div><div class="modal-actions"><button type="button" class="btn" onclick="closeEditProfileModal()">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div></form></div></div>
+
+        <!-- Change Password Modal -->
+        <div id="changePasswordModal" class="modal"><div class="modal-content"><h3>🔐 Change Password</h3><form id="changePasswordForm"><div class="form-group"><label>Current Password</label><input type="password" id="adminCurrentPwd" required></div><div class="form-group"><label>New Password</label><input type="password" id="adminNewPwd" required></div><div class="form-group"><label>Confirm Password</label><input type="password" id="adminConfirmPwd" required></div><div class="modal-actions"><button type="button" class="btn" onclick="closeChangePasswordModal()">Cancel</button><button type="submit" class="btn btn-primary">Update</button></div></form></div></div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="modal"><div class="modal-content"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--danger); margin-bottom: 1rem;"></i><h3>Confirm Delete</h3><p id="deleteMessage" style="margin: 1rem 0;"></p><div class="modal-actions"><button class="btn" onclick="closeDeleteModal()">Cancel</button><button class="btn btn-danger" id="confirmDeleteBtn"><i class="fas fa-trash"></i> Delete</button></div></div></div>
+
+        <script>
+        function createParticles() { const container = document.getElementById('particles'); for (let i = 0; i < 60; i++) { const p = document.createElement('div'); p.classList.add('particle'); const s = Math.random() * 5 + 2; p.style.width = s + 'px'; p.style.height = s + 'px'; p.style.left = Math.random() * 100 + '%'; p.style.animationDuration = Math.random() * 12 + 6 + 's'; p.style.animationDelay = Math.random() * 8 + 's'; container.appendChild(p); } }
+        createParticles();
+
+        const API_URL = 'http://localhost:5000/api';
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!token || user.role !== 'admin') window.location.href = 'login.html';
+
+        // Theme
+        const themeToggle = document.getElementById('themeToggle');
+        if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
+        themeToggle?.addEventListener('click', () => { document.body.classList.toggle('dark'); localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light'); });
+
+        // Profile Dropdown
+        const profileContainer = document.getElementById('profileDropdown');
+        document.getElementById('profileTrigger').addEventListener('click', (e) => { e.stopPropagation(); profileContainer.classList.toggle('active'); });
+        document.addEventListener('click', (e) => { if (!profileContainer.contains(e.target)) profileContainer.classList.remove('active'); });
+
+        function showAlert(msg, type) { const a = document.getElementById('alert'); a.textContent = msg; a.className = `alert alert-${type} show`; setTimeout(() => a.classList.remove('show'), 4000); }
+        function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+        let currentAdmin = {};
+        let adminAvatarBase64 = null;
+        let allUsers = [], allHelpers = [], allTasks = [], allReviews = [];
+        let deleteType = null, deleteId = null;
+
+        // Load Admin Profile
+        async function loadAdminProfile() {
+            try {
+                const res = await fetch(`${API_URL}/auth/profile`, { headers: { 'Authorization': `Bearer ${token}` } });
+                currentAdmin = await res.json();
+                const initial = currentAdmin.full_name?.charAt(0).toUpperCase() || 'A';
+                document.getElementById('navUserName').innerText = currentAdmin.full_name?.split(' ')[0] || 'Admin';
+                document.getElementById('dropdownUserName').innerText = currentAdmin.full_name;
+                document.getElementById('dropdownUserEmail').innerText = currentAdmin.email;
+                const savedAvatar = localStorage.getItem(`admin_avatar_${currentAdmin.id}`);
+                if (savedAvatar) {
+                    document.getElementById('navAvatar').style.backgroundImage = `url(${savedAvatar})`; document.getElementById('navAvatar').innerHTML = '';
+                    document.getElementById('dropdownAvatar').style.backgroundImage = `url(${savedAvatar})`; document.getElementById('dropdownAvatar').innerHTML = '';
+                    document.getElementById('adminAvatarPreview').style.backgroundImage = `url(${savedAvatar})`; document.getElementById('adminAvatarPreview').innerHTML = '';
+                } else {
+                    document.getElementById('navAvatar').innerHTML = `<span>${initial}</span>`;
+                    document.getElementById('dropdownAvatar').innerHTML = `<span>${initial}</span>`;
+                    document.getElementById('adminAvatarPreview').innerHTML = '<i class="fas fa-camera"></i>';
+                }
+                document.getElementById('adminFullName').value = currentAdmin.full_name;
+                document.getElementById('adminEmail').value = currentAdmin.email;
+                document.getElementById('adminPhone').value = currentAdmin.phone || '';
+            } catch(e) { console.error(e); }
+        }
+
+        document.getElementById('adminAvatarInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
+                const reader = new FileReader();
+                reader.onload = (ev) => { adminAvatarBase64 = ev.target.result; document.getElementById('adminAvatarPreview').style.backgroundImage = `url(${adminAvatarBase64})`; document.getElementById('adminAvatarPreview').innerHTML = ''; };
+                reader.readAsDataURL(file);
+            } else alert('Select JPEG/PNG');
+        });
+
+        function openEditProfileModal() { loadAdminProfile(); document.getElementById('editProfileModal').classList.add('active'); profileContainer.classList.remove('active'); }
+        function closeEditProfileModal() { document.getElementById('editProfileModal').classList.remove('active'); }
+        function openChangePasswordModal() { document.getElementById('changePasswordModal').classList.add('active'); profileContainer.classList.remove('active'); document.getElementById('changePasswordForm').reset(); }
+        function closeChangePasswordModal() { document.getElementById('changePasswordModal').classList.remove('active'); }
+
+        document.getElementById('editProfileBtn').addEventListener('click', openEditProfileModal);
+        document.getElementById('changePasswordBtn').addEventListener('click', openChangePasswordModal);
+        document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.clear(); window.location.href = 'index.html'; });
+
+        document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const updateData = { full_name: document.getElementById('adminFullName').value, email: document.getElementById('adminEmail').value, phone: document.getElementById('adminPhone').value };
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>';
+            try {
+                const res = await fetch(`${API_URL}/auth/update-profile`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(updateData) });
+                if (res.ok) {
+                    if (adminAvatarBase64) localStorage.setItem(`admin_avatar_${currentAdmin.id}`, adminAvatarBase64);
+                    showAlert('✅ Profile updated!', 'success');
+                    closeEditProfileModal(); loadAdminProfile();
+                } else showAlert('Update failed', 'error');
+            } catch(e) { showAlert('Error', 'error'); }
+            finally { btn.disabled = false; btn.innerHTML = 'Save Changes'; }
+        });
+
+        document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPwd = document.getElementById('adminNewPwd').value;
+            const confirm = document.getElementById('adminConfirmPwd').value;
+            if (newPwd !== confirm) { showAlert('Passwords do not match', 'error'); return; }
+            if (newPwd.length < 6) { showAlert('Min 6 characters', 'error'); return; }
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>';
+            try {
+                const res = await fetch(`${API_URL}/auth/update-profile`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ full_name: currentAdmin.full_name, email: currentAdmin.email, password: newPwd, current_password: document.getElementById('adminCurrentPwd').value }) });
+                if (res.ok) { showAlert('✅ Password changed! Please login again.', 'success'); setTimeout(() => { localStorage.clear(); window.location.href = 'login.html'; }, 2000); }
+                else showAlert('Current password incorrect', 'error');
+            } catch(e) { showAlert('Error', 'error'); }
+            finally { btn.disabled = false; btn.innerHTML = 'Update'; }
+        });
+
+        // Data Loading Functions
+        async function loadStats() { try { const res = await fetch(`${API_URL}/admin/stats`, { headers: { 'Authorization': `Bearer ${token}` } }); const stats = await res.json(); document.getElementById('totalUsers').innerText = stats.totalUsers || 0; document.getElementById('totalHelpers').innerText = stats.totalHelpers || 0; document.getElementById('totalTasks').innerText = stats.totalTasks || 0; document.getElementById('pendingTasks').innerText = stats.pendingTasks || 0; document.getElementById('completedTasks').innerText = stats.completedTasks || 0; document.getElementById('totalReviews').innerText = stats.totalReviews || 0; } catch(e) { console.error(e); } }
+        async function loadUsers() { try { const res = await fetch(`${API_URL}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } }); allUsers = await res.json(); displayUsers(); } catch(e) { console.error(e); } }
+        function displayUsers() { const search = document.getElementById('searchUsers')?.value.toLowerCase() || ''; const filtered = allUsers.filter(u => u.full_name?.toLowerCase().includes(search) || u.email?.toLowerCase().includes(search)); const tbody = document.getElementById('usersTableBody'); if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="8">No users found</td></tr>'; return; } tbody.innerHTML = filtered.map(u => `<tr><td>${u.id}</td><td>${escapeHtml(u.full_name)}</td><td>${escapeHtml(u.email)}</td><td>${u.phone || '-'}</td><td><span class="role-badge role-${u.role}">${u.role}</span></td><td>${u.is_active ? 'Active' : 'Inactive'}</td><td>${new Date(u.created_at).toLocaleDateString()}</td><td><button class="btn btn-danger btn-sm" onclick="confirmDelete('user', ${u.id}, '${escapeHtml(u.full_name)}')"><i class="fas fa-trash"></i></button></td></tr>`).join(''); }
+        async function loadHelpers() { try { const res = await fetch(`${API_URL}/admin/helpers`, { headers: { 'Authorization': `Bearer ${token}` } }); allHelpers = await res.json(); displayHelpers(); } catch(e) { console.error(e); } }
+        function displayHelpers() { const search = document.getElementById('searchHelpers')?.value.toLowerCase() || ''; const filtered = allHelpers.filter(h => h.full_name?.toLowerCase().includes(search) || h.email?.toLowerCase().includes(search)); const tbody = document.getElementById('helpersTableBody'); if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="9">No helpers found</td></tr>'; return; } tbody.innerHTML = filtered.map(h => `<tr><td>${h.id}</td><td>${escapeHtml(h.full_name)}</td><td>${escapeHtml(h.email)}</td><td>${h.phone || '-'}</td><td>${h.location || '-'}</td><td>${h.skills || '-'}</td><td>$${h.hourly_rate || '0'}/hr</td><td>⭐ ${h.rating || '0.0'}</td><td><button class="btn btn-danger btn-sm" onclick="confirmDelete('helper', ${h.id}, '${escapeHtml(h.full_name)}')"><i class="fas fa-trash"></i></button></td></tr>`).join(''); }
+        async function loadTasks() { try { const res = await fetch(`${API_URL}/admin/tasks`, { headers: { 'Authorization': `Bearer ${token}` } }); allTasks = await res.json(); displayTasks(); } catch(e) { console.error(e); } }
+        function displayTasks() { const status = document.getElementById('taskStatusFilter')?.value || 'all'; const search = document.getElementById('searchTasks')?.value.toLowerCase() || ''; const filtered = allTasks.filter(t => (status === 'all' || t.status === status) && (t.task_title?.toLowerCase().includes(search) || t.user_name?.toLowerCase().includes(search))); const tbody = document.getElementById('tasksTableBody'); if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="7">No tasks found</td></tr>'; return; } tbody.innerHTML = filtered.map(t => `<tr><td>${t.id}</td><td>${escapeHtml(t.task_title)}</td><td>${escapeHtml(t.user_name || '-')}</td><td>${escapeHtml(t.helper_name || 'Unassigned')}</td><td>${t.budget_range || '-'}</td><td><span class="status-badge status-${t.status}">${t.status?.replace('_', ' ')}</span></td><td>${new Date(t.created_at).toLocaleDateString()}</td></tr>`).join(''); }
+        async function loadReviews() { try { const res = await fetch(`${API_URL}/admin/reviews`, { headers: { 'Authorization': `Bearer ${token}` } }); allReviews = await res.json(); displayReviews(); } catch(e) { console.error(e); } }
+        function displayReviews() { const tbody = document.getElementById('reviewsTableBody'); if (!allReviews?.length) { tbody.innerHTML = '<tr><td colspan="7">No reviews yet</td></tr>'; return; } tbody.innerHTML = allReviews.map(r => `<tr><td>${r.id}</td><td>${escapeHtml(r.task_title || '-')}</td><td>${escapeHtml(r.reviewer_name || '-')}</td><td>${escapeHtml(r.reviewee_name || '-')}</td><td>${'⭐'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</td><td>${escapeHtml(r.comment?.substring(0, 50))}${r.comment?.length > 50 ? '...' : ''}</td><td>${new Date(r.created_at).toLocaleDateString()}</td></tr>`).join(''); }
+
+        function filterUsers() { displayUsers(); }
+        function filterHelpers() { displayHelpers(); }
+        function filterTasks() { displayTasks(); }
+
+        function confirmDelete(type, id, name) { deleteType = type; deleteId = id; document.getElementById('deleteMessage').innerHTML = `Are you sure you want to delete ${type} "${name}"?`; document.getElementById('deleteModal').classList.add('active'); }
+        function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('active'); deleteType = null; deleteId = null; }
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async () => { if (!deleteType || !deleteId) return; try { const res = await fetch(`${API_URL}/admin/user/${deleteId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); if (res.ok) { showAlert(`${deleteType === 'user' ? 'User' : 'Helper'} deleted`, 'success'); closeDeleteModal(); loadStats(); loadUsers(); loadHelpers(); } else showAlert('Delete failed', 'error'); } catch(e) { showAlert('Error', 'error'); } });
+
+        // Scroll Observer
+        const sections = document.querySelectorAll('.section');
+        const observer = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: 0.1 });
+        sections.forEach(s => observer.observe(s));
+
+        loadAdminProfile();
+        loadStats();
+        loadUsers();
+        loadHelpers();
+        loadTasks();
+        loadReviews();
+        </script>
+</body>
+</html>

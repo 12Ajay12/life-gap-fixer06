@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Life Gap Fixer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-gradient-start: #f8fafc;
+            --bg-gradient-end: #e2e8f0;
+            --surface-glass: rgba(255, 255, 255, 0.65);
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --accent: #7c3aed;
+            --accent-soft: rgba(124, 58, 237, 0.12);
+            --accent-2: #2563eb;
+            --border-light: rgba(0, 0, 0, 0.08);
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --btn-secondary-bg: rgba(0, 0, 0, 0.04);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body.dark {
+            --bg-gradient-start: #0f172a;
+            --bg-gradient-end: #020617;
+            --surface-glass: rgba(15, 23, 42, 0.65);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent: #8b5cf6;
+            --accent-2: #38bdf8;
+            --border-light: rgba(255, 255, 255, 0.08);
+            --card-bg: rgba(15, 23, 42, 0.7);
+            --btn-secondary-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-primary);
+            transition: background 0.4s ease, color 0.3s ease;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleFloat linear infinite;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.1; }
+            80% { opacity: 0.1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .orb-1, .orb-2 {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
+            pointer-events: none;
+            animation: orbFloat 20s infinite alternate;
+        }
+
+        .orb-1 { width: 300px; height: 300px; background: radial-gradient(circle, var(--accent), transparent); top: -100px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, var(--accent-2), transparent); bottom: -150px; right: -150px; animation-delay: -5s; }
+
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(5%, 5%) scale(1.1); }
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20%;
+            left: -10%;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, rgba(56, 189, 248, 0.08) 60%, transparent 80%);
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+            animation: floatBlob 18s infinite alternate;
+        }
+
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+            100% { transform: translate(5%, 5%) scale(1.1); opacity: 1; }
+        }
+
+        .page-shell {
+            position: relative;
+            z-index: 2;
+            width: min(1280px, calc(100% - 2.5rem));
+            margin: 0 auto;
+            padding: 1.5rem 0 0;
+        }
+
+        /* Premium Header */
+        .site-header {
+            position: sticky;
+            top: 1.2rem;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            padding: 0.7rem 2rem;
+            margin-bottom: 2rem;
+            border-radius: 3rem;
+            background: var(--surface-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            font-size: 1.45rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            background-size: 200% auto;
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+            letter-spacing: 1px;
+        }
+
+        .main-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            background: rgba(0, 0, 0, 0.02);
+            padding: 0.25rem;
+            border-radius: 3rem;
+        }
+
+        .main-nav a {
+            padding: 0.6rem 1.3rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 2rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .main-nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: all 0.3s;
+            transform: translateX(-50%);
+        }
+
+        .main-nav a:hover::after {
+            width: 60%;
+        }
+
+        .main-nav a.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+            animation: activePulse 2s infinite;
+        }
+
+        @keyframes activePulse {
+            0%, 100% { box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); }
+            50% { box-shadow: 0 4px 20px rgba(124, 58, 237, 0.5); }
+        }
+
+        .main-nav a:hover:not(.active) {
+            background: var(--accent-soft);
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* Premium Theme Toggle */
+        .theme-toggle {
+            background: var(--surface-glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: 3rem;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, var(--accent-soft), transparent);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .theme-toggle:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.5s;
+        }
+
+        .theme-toggle:hover svg {
+            transform: rotate(180deg);
+        }
+
+        /* Login Options - Animated Toggle */
+        .login-options {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: var(--btn-secondary-bg);
+            padding: 0.5rem;
+            border-radius: 3rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .login-option {
+            flex: 1;
+            text-align: center;
+            padding: 0.8rem;
+            border-radius: 2.5rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            font-weight: 600;
+            color: var(--text-muted);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .login-option:hover::before {
+            left: 100%;
+        }
+
+        .login-option.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+            animation: optionPop 0.4s ease;
+        }
+
+        @keyframes optionPop {
+            0% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+
+        .login-option i {
+            margin-right: 0.5rem;
+        }
+
+        /* Animated Slideshow Background for Form */
+        .slideshow-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .slide-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .slide-bg.active {
+            opacity: 0.15;
+        }
+
+        /* Form Container */
+        .form-container {
+            max-width: 500px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border-radius: 2rem;
+            border: 1px solid var(--border-light);
+            animation: fadeInUp 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--accent-soft), transparent);
+            opacity: 0;
+            transition: opacity 0.6s;
+            pointer-events: none;
+        }
+
+        .form-container:hover::before {
+            opacity: 0.5;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            background-size: 200% auto;
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .role-hint {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .role-hint i {
+            color: var(--accent);
+            margin-right: 0.3rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: all 0.3s;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border-light);
+            background: var(--btn-secondary-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+            transform: translateY(-2px);
+        }
+
+        .form-group input:focus + label {
+            color: var(--accent);
+        }
+
+        /* Premium Button */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            padding: 0.8rem 1.8rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(125deg, var(--accent), var(--accent-2));
+            color: white;
+            box-shadow: 0 6px 18px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -8px rgba(124, 58, 237, 0.5);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Alert Styles */
+        .alert {
+            padding: 1rem;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        /* ========== BEAUTIFUL WELCOME GREETING ANIMATION ========== */
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .welcome-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Animated Background Circles */
+        .welcome-bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: floatBg 20s infinite ease-in-out;
+        }
+
+        @keyframes floatBg {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -30px) scale(1.1); }
+        }
+
+        .circle-1 { width: 300px; height: 300px; top: -100px; right: -100px; animation-delay: 0s; }
+        .circle-2 { width: 200px; height: 200px; bottom: -50px; left: -50px; animation-delay: 2s; }
+        .circle-3 { width: 150px; height: 150px; top: 50%; left: 20%; animation-delay: 4s; }
+        .circle-4 { width: 250px; height: 250px; bottom: 20%; right: 10%; animation-delay: 1s; }
+
+        .welcome-card {
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            transform: scale(0.8) translateY(50px);
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.34, 1.3, 0.55, 1);
+        }
+
+        .welcome-overlay.active .welcome-card {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        /* Floating Stars */
+        .star {
+            position: absolute;
+            color: white;
+            opacity: 0;
+            animation: starTwinkle 2s ease-in-out infinite;
+        }
+
+        @keyframes starTwinkle {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Animated Icon */
+        .welcome-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #fff, rgba(255,255,255,0.2));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 0 40px rgba(255,255,255,0.3);
+            animation: iconFloat 2s ease-in-out infinite, iconGlow 2s ease-in-out infinite;
+            position: relative;
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes iconGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255,255,255,0.3); }
+            50% { box-shadow: 0 0 50px rgba(255,255,255,0.6); }
+        }
+
+        .welcome-icon i {
+            font-size: 3.5rem;
+            color: var(--accent);
+            animation: iconSpin 0.8s ease-out, iconPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes iconSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .welcome-text {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #f0f0f0);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+            animation: textReveal 0.8s ease-out;
+            letter-spacing: -0.02em;
+        }
+
+        @keyframes textReveal {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+                letter-spacing: 0.5em;
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                letter-spacing: -0.02em;
+            }
+        }
+
+        .welcome-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            animation: slideInLeft 0.6s ease-out 0.2s both;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .welcome-role {
+            display: inline-block;
+            padding: 0.4rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            animation: slideInRight 0.6s ease-out 0.3s both;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .welcome-message {
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 1rem;
+            font-size: 0.95rem;
+            animation: fadeInUp 0.6s ease-out 0.4s both;
+        }
+
+        /* Confetti Animation */
+        .confetti {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            position: absolute;
+            animation: confettiFall 3s ease-out forwards;
+            border-radius: 2px;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Loading Spinner in Welcome */
+        .welcome-loading {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            animation: fadeInUp 0.6s ease-out 0.5s both;
+        }
+
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: loadingBounce 1.4s ease-in-out infinite;
+        }
+
+        .loading-dot:nth-child(1) { animation-delay: 0s; }
+        .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes loadingBounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .test-accounts {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .test-accounts p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .test-accounts small {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--accent);
+            margin-bottom: 0.25rem;
+            transition: all 0.3s;
+        }
+
+        .test-accounts small:hover {
+            transform: translateX(5px);
+            color: var(--accent-2);
+        }
+
+        /* Professional Footer */
+        .footer {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-light);
+            margin-top: 4rem;
+            padding: 3rem 0 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            animation: footerShine 8s infinite;
+        }
+
+        @keyframes footerShine {
+            0% { left: -100%; }
+            20% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1.2rem;
+            color: var(--accent);
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            border-radius: 2px;
+        }
+
+        .footer-section p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.6rem;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+            transform: translateX(5px);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-3px) rotate(360deg);
+        }
+
+        .newsletter-form {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .newsletter-form input {
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid var(--border-light);
+            background: var(--btn-secondary-bg);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        .newsletter-form button {
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            background: linear-gradient(125deg, var(--accent), var(--accent-2));
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .newsletter-form button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-light);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 640px) {
+            .site-header { flex-wrap: wrap; }
+            .main-nav { order: 3; width: 100%; justify-content: center; margin-top: 0.5rem; }
+            .form-container { margin: 1rem; padding: 1.5rem; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .newsletter-form { flex-direction: column; }
+            .login-options { flex-direction: column; gap: 0.5rem; }
+            .login-option { padding: 0.6rem; }
+            .welcome-text { font-size: 1.5rem; }
+            .welcome-name { font-size: 1.2rem; }
+            .welcome-icon { width: 80px; height: 80px; }
+            .welcome-icon i { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Slideshow Background -->
+    <div class="slideshow-bg" id="slideshowBg">
+        <img class="slide-bg active" src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1920&h=1080&fit=crop" alt="Background 1">
+        <img class="slide-bg" src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1920&h=1080&fit=crop" alt="Background 2">
+        <img class="slide-bg" src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=1920&h=1080&fit=crop" alt="Background 3">
+        <img class="slide-bg" src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=1920&h=1080&fit=crop" alt="Background 4">
+    </div>
+
+    <!-- Beautiful Welcome Greeting Overlay -->
+    <div id="welcomeOverlay" class="welcome-overlay">
+        <!-- Animated Background Circles -->
+        <div class="welcome-bg-circle circle-1"></div>
+        <div class="welcome-bg-circle circle-2"></div>
+        <div class="welcome-bg-circle circle-3"></div>
+        <div class="welcome-bg-circle circle-4"></div>
+        
+        <!-- Floating Stars -->
+        <div id="starsContainer"></div>
+        
+        <div class="welcome-card">
+            <div class="welcome-icon">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="welcome-text" id="welcomeText">Welcome Back!</div>
+            <div class="welcome-name" id="welcomeName">Loading...</div>
+            <div class="welcome-role" id="welcomeRole"></div>
+            <div class="welcome-message" id="welcomeMessage">Redirecting to your dashboard...</div>
+            <div class="welcome-loading">
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Animated Particles -->
+    <div class="particles" id="particles"></div>
+    <div class="orb-1"></div>
+    <div class="orb-2"></div>
+
+    <div class="page-shell">
+        <header class="site-header">
+            <a class="logo" href="index.html">✨ Life Gap Fixer</a>
+            <nav class="main-nav">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="services.html">Services</a>
+                <a href="login.html" class="active">Login</a>
+                <a href="register.html">Register</a>
+            </nav>
+            <div class="theme-toggle" id="themeToggle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                </svg>
+                <span>Light/Dark</span>
+            </div>
+        </header>
+
+        <div class="form-container">
+            <h2>Welcome Back</h2>
+            
+            <!-- Animated Login Options -->
+            <div class="login-options">
+                <div class="login-option active" data-role="user">
+                    <i class="fas fa-user"></i> User Login
+                </div>
+                <div class="login-option" data-role="helper">
+                    <i class="fas fa-tools"></i> Helper Login
+                </div>
+            </div>
+            
+            <div class="role-hint" id="roleHint">
+                <i class="fas fa-info-circle"></i> Login as User to post tasks and manage requests
+            </div>
+            
+            <div id="alert" class="alert"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter your password">
+                </div>
+                <button type="submit" class="btn btn-primary" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+            
+            <!-- Dynamic Test Accounts based on selected role -->
+            <div class="test-accounts" id="testAccounts">
+                <p><i class="fas fa-info-circle"></i> Test Accounts</p>
+                <div id="testAccountsList">
+                    <small>📧 user2@gmail.com | 🔑 2345</small>
+                    <small>📧 user3@gmail.com | 🔑 3456</small>
+                    <small>📧 user4@gmail.com | 🔑 4567</small>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 1rem;">
+                Don't have an account? <a href="register.html" style="color: var(--accent); font-weight: 600;">Register here</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Professional Footer -->
+    <footer class="footer">
+        <div class="page-shell">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>✨ Life Gap Fixer</h3>
+                    <p>Bridging tasks and helpers with elegance & efficiency. Empowering communities one task at a time.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">→ Home</a></li>
+                        <li><a href="about.html">→ About Us</a></li>
+                        <li><a href="services.html">→ Services</a></li>
+                        <li><a href="login.html">→ Login</a></li>
+                        <li><a href="register.html">→ Register</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">→ Help Center</a></li>
+                        <li><a href="#">→ Terms of Service</a></li>
+                        <li><a href="#">→ Privacy Policy</a></li>
+                        <li><a href="#">→ FAQ</a></li>
+                        <li><a href="#">→ Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Newsletter</h3>
+                    <p>Subscribe to get updates about new features and offers.</p>
+                    <div class="newsletter-form">
+                        <input type="email" placeholder="Your email address">
+                        <button>Subscribe</button>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Life Gap Fixer. All rights reserved. | Designed with <i class="fas fa-heart" style="color: var(--danger);"></i> for better living</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Create Particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 60; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 5 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = Math.random() * 12 + 6 + 's';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // Create Floating Stars
+        function createStars() {
+            const container = document.getElementById('starsContainer');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.innerHTML = '<i class="fas fa-star"></i>';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.fontSize = Math.random() * 20 + 10 + 'px';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = Math.random() * 2 + 1 + 's';
+                container.appendChild(star);
+            }
+        }
+        createStars();
+
+        // Background Slideshow
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide-bg');
+        
+        function changeBackgroundSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+            currentSlide = (currentSlide + 1) % slides.length;
+        }
+        
+        setInterval(changeBackgroundSlide, 5000);
+
+        // API Configuration
+        const API_URL = 'http://localhost:5000/api';
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
+        themeToggle?.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        // Login Role Selection
+        let selectedRole = 'user';
+        const loginOptions = document.querySelectorAll('.login-option');
+        const roleHint = document.getElementById('roleHint');
+        const testAccountsList = document.getElementById('testAccountsList');
+        
+        const roleHints = {
+            user: '📝 Login as User to post tasks, track progress, and manage your requests',
+            helper: '🛠️ Login as Helper to accept tasks, complete work, and earn money'
+        };
+        
+        const testAccounts = {
+            user: `
+                <small>📧 user2@gmail.com | 🔑 2345</small>
+                <small>📧 user3@gmail.com | 🔑 3456</small>
+                <small>📧 user4@gmail.com | 🔑 4567</small>
+            `,
+            helper: `
+                <small>🔧 helper2@gmail.com | 🔑 helper123</small>
+                <small>🔧 helper3@gmail.com | 🔑 helper123</small>
+                <small>🔧 helper4@gmail.com | 🔑 helper123</small>
+            `
+        };
+        
+        loginOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                loginOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                selectedRole = option.dataset.role;
+                
+                // Update role hint with animation
+                roleHint.style.animation = 'none';
+                roleHint.offsetHeight;
+                roleHint.style.animation = 'fadeInUp 0.6s ease-out';
+                roleHint.innerHTML = `<i class="fas fa-info-circle"></i> ${roleHints[selectedRole]}`;
+                
+                // Update test accounts with animation
+                testAccountsList.style.opacity = '0';
+                setTimeout(() => {
+                    testAccountsList.innerHTML = testAccounts[selectedRole];
+                    testAccountsList.style.opacity = '1';
+                }, 200);
+            });
+        });
+
+        // Show Alert Function
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alert');
+            alertDiv.textContent = message;
+            alertDiv.className = `alert alert-${type} show`;
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+            }, 5000);
+        }
+
+        // Show Beautiful Welcome Greeting
+        function showWelcomeGreeting(userName, userRole) {
+            const overlay = document.getElementById('welcomeOverlay');
+            const welcomeText = document.getElementById('welcomeText');
+            const welcomeName = document.getElementById('welcomeName');
+            const welcomeRole = document.getElementById('welcomeRole');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            
+            // Set dynamic content based on role
+            const roleDisplay = userRole === 'user' ? '👤 User Account' : userRole === 'helper' ? '🛠️ Helper Account' : '👑 Admin Account';
+            const roleMessage = userRole === 'user' ? 'Ready to post and manage your tasks?' : 
+                               userRole === 'helper' ? 'Ready to accept tasks and earn money?' : 
+                               'Ready to manage the platform?';
+            
+            welcomeName.textContent = userName;
+            welcomeRole.innerHTML = roleDisplay;
+            welcomeMessage.textContent = roleMessage;
+            
+            // Create beautiful confetti effect
+            const colors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff6bcb', '#ff9f4a'];
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.width = Math.random() * 10 + 5 + 'px';
+                confetti.style.height = Math.random() * 10 + 5 + 'px';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = Math.random() * 2 + 1.5 + 's';
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                overlay.appendChild(confetti);
+            }
+            
+            // Show overlay
+            overlay.classList.add('active');
+            
+            // Hide overlay and redirect after animation
+            setTimeout(() => {
+                overlay.classList.remove('active');
+                // Remove confetti elements
+                const confettiElements = document.querySelectorAll('.confetti');
+                confettiElements.forEach(el => el.remove());
+            }, 3200);
+        }
+
+        // Login Form Submission
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Validate inputs
+            if (!email || !password) {
+                showAlert('Please enter both email and password', 'error');
+                return;
+            }
+            
+            // Disable button and show loading
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Logging in...';
+            
+            try {
+                console.log('Attempting login for:', email);
+                
+                // Make API call to backend
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                console.log('Server response:', data);
+                
+                if (response.ok && data.success) {
+                    // Store token and user data
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Check if role matches selected option (optional validation)
+                    if (data.user.role !== selectedRole && data.user.role !== 'admin') {
+                        showAlert(`This account is registered as ${data.user.role}. Please select the correct login option.`, 'error');
+                        loginBtn.disabled = false;
+                        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                        return;
+                    }
+                    
+                    // Show beautiful welcome greeting animation
+                    showWelcomeGreeting(data.user.full_name, data.user.role);
+                    
+                    // Redirect after animation completes
+                    setTimeout(() => {
+                        if (data.user.role === 'user') {
+                            window.location.href = 'user-dashboard.html';
+                        } else if (data.user.role === 'helper') {
+                            window.location.href = 'helper-dashboard.html';
+                        } else if (data.user.role === 'admin') {
+                            window.location.href = 'admin-dashboard.html';
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    }, 3000);
+                } else {
+                    // Login failed
+                    const errorMessage = data.message || 'Invalid email or password';
+                    showAlert(errorMessage, 'error');
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                // Check if backend is running
+                if (error.message.includes('Failed to fetch')) {
+                    showAlert('Cannot connect to server. Please make sure the backend is running on port 5000.', 'error');
+                } else {
+                    showAlert('Network error. Please try again.', 'error');
+                }
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+            }
+        });
+
+        // Newsletter Subscription
+        const subscribeBtn = document.querySelector('.newsletter-form button');
+        if (subscribeBtn) {
+            subscribeBtn.addEventListener('click', () => {
+                const input = document.querySelector('.newsletter-form input');
+                if (input.value) {
+                    alert('🎉 Thank you for subscribing!');
+                    input.value = '';
+                } else {
+                    alert('Please enter your email address.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

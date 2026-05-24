@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helper Dashboard - Life Gap Fixer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-gradient-start: #f8fafc;
+            --bg-gradient-end: #e2e8f0;
+            --surface-glass: rgba(255, 255, 255, 0.65);
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --accent: #7c3aed;
+            --accent-soft: rgba(124, 58, 237, 0.12);
+            --accent-2: #2563eb;
+            --border-light: rgba(0, 0, 0, 0.08);
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --btn-secondary-bg: rgba(0, 0, 0, 0.04);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+        }
+
+        body.dark {
+            --bg-gradient-start: #0f172a;
+            --bg-gradient-end: #020617;
+            --surface-glass: rgba(15, 23, 42, 0.65);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent: #8b5cf6;
+            --accent-2: #38bdf8;
+            --border-light: rgba(255, 255, 255, 0.08);
+            --card-bg: rgba(15, 23, 42, 0.7);
+            --btn-secondary-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-primary);
+            transition: all 0.4s;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleFloat linear infinite;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.15; }
+            80% { opacity: 0.15; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .orb-1, .orb-2 {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
+            pointer-events: none;
+            animation: orbFloat 20s infinite alternate;
+        }
+
+        .orb-1 { width: 300px; height: 300px; background: radial-gradient(circle, var(--accent), transparent); top: -100px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, var(--accent-2), transparent); bottom: -150px; right: -150px; animation-delay: -5s; }
+
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(5%, 5%) scale(1.1); }
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20%;
+            left: -10%;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, rgba(56, 189, 248, 0.08) 60%, transparent 80%);
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+            animation: floatBlob 18s infinite alternate;
+        }
+
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+            100% { transform: translate(5%, 5%) scale(1.1); opacity: 1; }
+        }
+
+        .page-shell { position: relative; z-index: 2; width: min(1280px, calc(100% - 2.5rem)); margin: 0 auto; padding: 1.5rem 0 3rem; }
+        
+        .site-header {
+            position: sticky; top: 1.2rem; z-index: 100; display: flex; align-items: center;
+            justify-content: space-between; gap: 1.5rem; padding: 0.7rem 2rem; margin-bottom: 2rem;
+            border-radius: 3rem; background: var(--surface-glass); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo { 
+            font-size: 1.45rem; font-weight: 800; 
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            background-size: 200% auto;
+            background-clip: text; -webkit-background-clip: text; color: transparent; 
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .logo:hover { transform: scale(1.02); letter-spacing: 1px; }
+
+        .main-nav { display: flex; flex-wrap: wrap; gap: 0.25rem; background: rgba(0, 0, 0, 0.02); padding: 0.25rem; border-radius: 3rem; }
+        .main-nav a { 
+            padding: 0.6rem 1.3rem; color: var(--text-secondary); font-weight: 600; font-size: 0.9rem; 
+            border-radius: 2rem; transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1); 
+            text-decoration: none; cursor: pointer; position: relative;
+        }
+        .main-nav a::after {
+            content: ''; position: absolute; bottom: 0; left: 50%; width: 0; height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: all 0.3s ease; transform: translateX(-50%);
+        }
+        .main-nav a:hover::after { width: 60%; }
+        .main-nav a:hover { background: var(--accent-soft); color: var(--accent); transform: translateY(-2px); }
+
+        /* Profile Dropdown - EXACTLY matching User Dashboard */
+        .profile-dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-trigger-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            transition: all 0.3s;
+            background: var(--accent-soft);
+            border: 1px solid transparent;
+        }
+
+        .profile-trigger-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .profile-trigger-btn:hover .profile-name,
+        .profile-trigger-btn:hover .profile-icon,
+        .profile-trigger-btn:hover .avatar-small {
+            color: white;
+        }
+
+        .avatar-small {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .profile-icon {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+
+        .profile-dropdown-container.active .profile-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu-list {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 280px;
+            background: white;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            z-index: 1000;
+        }
+
+        body.dark .dropdown-menu-list {
+            background: #1e293b;
+            border-color: #334155;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .profile-dropdown-container.active .dropdown-menu-list {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-header-section {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        body.dark .dropdown-header-section {
+            border-bottom-color: #334155;
+        }
+
+        .dropdown-avatar-large {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+        }
+
+        .dropdown-user-info-section {
+            flex: 1;
+        }
+
+        .dropdown-user-fullname {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .dropdown-user-email-address {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .dropdown-items-list {
+            padding: 0.5rem 0;
+        }
+
+        .dropdown-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .dropdown-menu-item:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .dropdown-menu-item i {
+            width: 20px;
+            font-size: 1rem;
+        }
+
+        .menu-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        body.dark .menu-divider {
+            background: #334155;
+        }
+
+        .logout-menu-item {
+            color: var(--danger);
+        }
+
+        .logout-menu-item:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .theme-toggle {
+            background: var(--surface-glass); backdrop-filter: blur(12px); border: 1px solid var(--border-light);
+            border-radius: 3rem; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem;
+            cursor: pointer; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            font-weight: 600; font-size: 0.85rem; color: var(--text-secondary);
+            position: relative; overflow: hidden;
+        }
+        .theme-toggle::before {
+            content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0;
+            background: radial-gradient(circle, var(--accent-soft), transparent);
+            border-radius: 50%; transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .theme-toggle:hover::before { width: 200px; height: 200px; }
+        .theme-toggle svg { width: 20px; height: 20px; transition: transform 0.5s ease; }
+        .theme-toggle:hover svg { transform: rotate(180deg); }
+
+        .dashboard-container { padding: 1rem 0; }
+        .dashboard-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .dashboard-header h1 { 
+            font-size: 1.8rem; 
+            background: linear-gradient(135deg, var(--text-primary), var(--accent));
+            background-clip: text; -webkit-background-clip: text; color: transparent;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid var(--border-light);
+            transition: all 0.3s;
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        .stat-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 20px 30px -12px rgba(124, 58, 237, 0.2); }
+        .stat-card h3 { font-size: 2rem; color: var(--accent); margin-bottom: 0.5rem; }
+        .stat-card p { color: var(--text-muted); font-size: 0.9rem; }
+
+        .tasks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+        .task-card { 
+            background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 1.5rem; 
+            padding: 1.5rem; border: 1px solid var(--border-light); 
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        .task-card:hover { transform: translateY(-6px) scale(1.02); border-color: var(--accent); box-shadow: 0 20px 40px -15px rgba(124, 58, 237, 0.3); }
+        .task-status { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; margin-bottom: 0.75rem; text-transform: uppercase; }
+        .status-pending { background: var(--warning); color: #fff; }
+        .status-accepted { background: var(--info); color: #fff; }
+        .status-in_progress { background: var(--accent); color: #fff; }
+        .status-completed { background: var(--success); color: #fff; }
+        .task-detail { color: var(--text-secondary); font-size: 0.85rem; margin: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem; }
+        .task-actions { margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+        .btn { 
+            display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1.2rem; 
+            border-radius: 2rem; font-weight: 600; transition: all 0.3s; cursor: pointer; border: none; font-size: 0.85rem;
+        }
+        .btn-primary { background: linear-gradient(125deg, var(--accent), var(--accent-2)); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-secondary { background: var(--btn-secondary-bg); border: 1px solid var(--border-light); color: var(--text-primary); }
+
+        .alert { padding: 1rem; border-radius: 1rem; margin-bottom: 1rem; display: none; }
+        .alert.show { display: block; animation: slideDown 0.3s ease; }
+        .alert-success { background: rgba(16, 185, 129, 0.2); border: 1px solid var(--success); color: var(--success); }
+        .alert-error { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); color: var(--danger); }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .empty-state { text-align: center; padding: 3rem; background: var(--card-bg); border-radius: 1.5rem; border: 1px solid var(--border-light); }
+        .reviews-section { margin-top: 2rem; }
+        .review-card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 1.5rem; padding: 1.2rem; border: 1px solid var(--border-light); margin-bottom: 1rem; }
+        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem; }
+        .review-rating { color: #fbbf24; font-size: 1.1rem; }
+        .footer-panel { text-align: center; padding: 2rem 0 1rem; border-top: 1px solid var(--border-light); color: var(--text-muted); margin-top: 2rem; }
+
+        /* Modals */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); z-index: 1001; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 1.5rem; padding: 2rem; max-width: 500px; width: 90%; animation: modalPop 0.3s ease; }
+        body.dark .modal-content { background: #1e293b; }
+        @keyframes modalPop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .modal-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0; }
+        body.dark .modal-header { border-bottom-color: #334155; }
+        .modal-icon { width: 50px; height: 50px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-radius: 1rem; display: flex; align-items: center; justify-content: center; }
+        .modal-icon i { font-size: 1.8rem; color: white; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-secondary); font-size: 0.85rem; }
+        .form-group input { width: 100%; padding: 0.8rem 1rem; border-radius: 0.8rem; border: 1px solid #e2e8f0; background: #f8fafc; color: var(--text-primary); font-size: 0.95rem; }
+        body.dark .form-group input { border-color: #334155; background: #0f172a; }
+        .form-group input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+        .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; }
+        body.dark .modal-actions { border-top-color: #334155; }
+        .avatar-preview { width: 80px; height: 80px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2rem; color: white; cursor: pointer; background-size: cover; background-position: center; }
+        .avatar-file-input { display: none; }
+
+        @media (max-width: 640px) {
+            .site-header { flex-wrap: wrap; }
+            .main-nav { order: 2; width: auto; justify-content: center; }
+            .profile-dropdown-container { order: 3; }
+            .tasks-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="orb-1"></div>
+    <div class="orb-2"></div>
+
+    <div class="page-shell">
+        <header class="site-header">
+            <a class="logo" href="index.html">✨ Life Gap Fixer</a>
+            <nav class="main-nav">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="services.html">Services</a>
+            </nav>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <!-- Profile Dropdown - EXACT MATCH to User Dashboard -->
+                <div class="profile-dropdown-container" id="profileDropdownContainer">
+                    <div class="profile-trigger-btn" id="profileTriggerBtn">
+                        <div class="avatar-small" id="navAvatarSmall"><i class="fas fa-user"></i></div>
+                        <span class="profile-name" id="navUserNameText">Account</span>
+                        <i class="fas fa-chevron-down profile-icon"></i>
+                    </div>
+                    <div class="dropdown-menu-list">
+                        <div class="dropdown-header-section">
+                            <div class="dropdown-avatar-large" id="dropdownAvatarLarge"><i class="fas fa-user"></i></div>
+                            <div class="dropdown-user-info-section">
+                                <div class="dropdown-user-fullname" id="dropdownFullName">Loading...</div>
+                                <div class="dropdown-user-email-address" id="dropdownEmail">Loading...</div>
+                            </div>
+                        </div>
+                        <div class="dropdown-items-list">
+                            <div class="dropdown-menu-item" id="myProfileMenuItem">
+                                <i class="fas fa-user-edit"></i>
+                                <span>Your Profile</span>
+                            </div>
+                            <div class="dropdown-menu-item" id="changePasswordMenuItem">
+                                <i class="fas fa-key"></i>
+                                <span>Change Password</span>
+                            </div>
+                            <div class="menu-divider"></div>
+                            <div class="dropdown-menu-item" onclick="scrollToAvailableTasks()">
+                                <i class="fas fa-clock"></i>
+                                <span>Available Tasks</span>
+                            </div>
+                            <div class="dropdown-menu-item" onclick="scrollToMyTasks()">
+                                <i class="fas fa-check-circle"></i>
+                                <span>My Tasks</span>
+                            </div>
+                            <div class="dropdown-menu-item" onclick="scrollToReviews()">
+                                <i class="fas fa-star"></i>
+                                <span>My Reviews</span>
+                            </div>
+                            <div class="menu-divider"></div>
+                            <div class="dropdown-menu-item logout-menu-item" id="logoutMenuItem">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Sign Out</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="theme-toggle" id="themeToggle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                    </svg>
+                    <span>Light/Dark</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1>🛠️ Helper Dashboard</h1>
+            </div>
+            <div id="alert" class="alert"></div>
+
+            <div class="stats-grid">
+                <div class="stat-card"><h3 id="totalEarned">$0</h3><p>Total Earned</p></div>
+                <div class="stat-card"><h3 id="completedTasks">0</h3><p>Completed Tasks</p></div>
+                <div class="stat-card"><h3 id="rating">0.0</h3><p>Rating</p></div>
+                <div class="stat-card"><h3 id="totalReviews">0</h3><p>Total Reviews</p></div>
+            </div>
+
+            <h2 style="margin: 1.5rem 0 1rem;" id="availableTasksHeading"><i class="fas fa-clock"></i> Available Tasks</h2>
+            <div id="availableTasksContainer"><div class="empty-state"><p>Loading available tasks...</p></div></div>
+
+            <h2 style="margin: 2rem 0 1rem;" id="myTasksHeading"><i class="fas fa-check-circle"></i> My Assigned Tasks</h2>
+            <div id="myTasksContainer"><div class="empty-state"><p>Loading your tasks...</p></div></div>
+
+            <div id="reviewsContainer" class="reviews-section"></div>
+        </div>
+
+        <!-- Edit Profile Modal -->
+        <div id="editProfileModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-icon"><i class="fas fa-user-edit"></i></div>
+                    <div><h2>Edit Profile</h2><p>Update your personal information</p></div>
+                </div>
+                <form id="editProfileForm">
+                    <div style="text-align:center;">
+                        <div class="avatar-preview" id="avatarPreviewImg" onclick="document.getElementById('avatarFileInput').click()">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <input type="file" id="avatarFileInput" class="avatar-file-input" accept="image/jpeg,image/png">
+                        <small style="color:var(--text-muted); display:block; margin-bottom:1rem;">Click to upload profile photo</small>
+                    </div>
+                    <div class="form-group"><label>Full Name</label><input type="text" id="editFullName" required></div>
+                    <div class="form-group"><label>Email Address</label><input type="email" id="editEmail" required></div>
+                    <div class="form-group"><label>Phone Number</label><input type="tel" id="editPhone"></div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditProfileModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Change Password Modal -->
+        <div id="changePwdModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-icon"><i class="fas fa-key"></i></div>
+                    <div><h2>Change Password</h2><p>Secure your account</p></div>
+                </div>
+                <form id="changePwdForm">
+                    <div class="form-group"><label>Current Password</label><input type="password" id="currentPwd" required></div>
+                    <div class="form-group"><label>New Password</label><input type="password" id="newPwd" required></div>
+                    <div class="form-group"><label>Confirm Password</label><input type="password" id="confirmPwd" required></div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeChangePwdModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <footer class="footer-panel"><p>✨ Life Gap Fixer — bridging tasks and helpers with elegance & efficiency. © 2025</p></footer>
+    </div>
+
+    <script>
+        createParticles();
+
+        const API_URL = 'http://localhost:5000/api';
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!token) window.location.href = 'login.html';
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
+        themeToggle?.addEventListener('click', () => { 
+            document.body.classList.toggle('dark'); 
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light'); 
+        });
+
+        // Profile Dropdown Toggle
+        const profileContainer = document.getElementById('profileDropdownContainer');
+        const profileTrigger = document.getElementById('profileTriggerBtn');
+        profileTrigger.addEventListener('click', (e) => { e.stopPropagation(); profileContainer.classList.toggle('active'); });
+        document.addEventListener('click', (e) => { if (!profileContainer.contains(e.target)) profileContainer.classList.remove('active'); });
+
+        function scrollToAvailableTasks() { document.getElementById('availableTasksHeading').scrollIntoView({ behavior: 'smooth' }); profileContainer.classList.remove('active'); }
+        function scrollToMyTasks() { document.getElementById('myTasksHeading').scrollIntoView({ behavior: 'smooth' }); profileContainer.classList.remove('active'); }
+        function scrollToReviews() { document.getElementById('reviewsContainer').scrollIntoView({ behavior: 'smooth' }); profileContainer.classList.remove('active'); }
+
+        function showAlert(msg, type) { const a = document.getElementById('alert'); a.textContent = msg; a.className = `alert alert-${type} show`; setTimeout(() => a.classList.remove('show'), 4000); }
+        function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+        let currentProfileData = {};
+        let avatarBase64Data = null;
+
+        // Load Profile
+        async function loadProfileData() {
+            try {
+                const res = await fetch(`${API_URL}/auth/profile`, { headers: { 'Authorization': `Bearer ${token}` } });
+                currentProfileData = await res.json();
+                const initial = currentProfileData.full_name?.charAt(0).toUpperCase() || 'U';
+                
+                document.getElementById('navUserNameText').innerText = currentProfileData.full_name?.split(' ')[0] || 'Helper';
+                document.getElementById('dropdownFullName').innerText = currentProfileData.full_name;
+                document.getElementById('dropdownEmail').innerText = currentProfileData.email;
+                
+                const savedAvatar = localStorage.getItem(`helper_avatar_${currentProfileData.id}`);
+                if (savedAvatar) {
+                    document.getElementById('navAvatarSmall').style.backgroundImage = `url(${savedAvatar})`;
+                    document.getElementById('navAvatarSmall').innerHTML = '';
+                    document.getElementById('dropdownAvatarLarge').style.backgroundImage = `url(${savedAvatar})`;
+                    document.getElementById('dropdownAvatarLarge').innerHTML = '';
+                    document.getElementById('avatarPreviewImg').style.backgroundImage = `url(${savedAvatar})`;
+                    document.getElementById('avatarPreviewImg').innerHTML = '';
+                } else {
+                    document.getElementById('navAvatarSmall').innerHTML = `<span>${initial}</span>`;
+                    document.getElementById('dropdownAvatarLarge').innerHTML = `<span>${initial}</span>`;
+                    document.getElementById('avatarPreviewImg').innerHTML = '<i class="fas fa-camera"></i>';
+                }
+                
+                document.getElementById('editFullName').value = currentProfileData.full_name;
+                document.getElementById('editEmail').value = currentProfileData.email;
+                document.getElementById('editPhone').value = currentProfileData.phone || '';
+            } catch(e) { console.error(e); }
+        }
+
+        // Avatar Upload
+        document.getElementById('avatarFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
+                const reader = new FileReader();
+                reader.onload = (ev) => { 
+                    avatarBase64Data = ev.target.result; 
+                    document.getElementById('avatarPreviewImg').style.backgroundImage = `url(${avatarBase64Data})`; 
+                    document.getElementById('avatarPreviewImg').innerHTML = ''; 
+                };
+                reader.readAsDataURL(file);
+            } else alert('Please select JPEG/PNG');
+        });
+
+        // Edit Profile Functions
+        function openEditProfileModal() { loadProfileData(); document.getElementById('editProfileModal').classList.add('active'); profileContainer.classList.remove('active'); }
+        function closeEditProfileModal() { document.getElementById('editProfileModal').classList.remove('active'); }
+        
+        // Change Password Functions
+        function openChangePwdModal() { document.getElementById('changePwdModal').classList.add('active'); profileContainer.classList.remove('active'); document.getElementById('changePwdForm').reset(); }
+        function closeChangePwdModal() { document.getElementById('changePwdModal').classList.remove('active'); }
+
+        document.getElementById('myProfileMenuItem').addEventListener('click', openEditProfileModal);
+        document.getElementById('changePasswordMenuItem').addEventListener('click', openChangePwdModal);
+        document.getElementById('logoutMenuItem').addEventListener('click', () => { localStorage.clear(); window.location.href = 'index.html'; });
+
+        // Submit Edit Profile
+        document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const updateData = {
+                full_name: document.getElementById('editFullName').value,
+                email: document.getElementById('editEmail').value,
+                phone: document.getElementById('editPhone').value
+            };
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving...';
+            try {
+                const res = await fetch(`${API_URL}/auth/update-profile`, { 
+                    method: 'PUT', 
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+                    body: JSON.stringify(updateData) 
+                });
+                if (res.ok) {
+                    if (avatarBase64Data) localStorage.setItem(`helper_avatar_${currentProfileData.id}`, avatarBase64Data);
+                    showAlert('✅ Profile updated successfully!', 'success');
+                    closeEditProfileModal();
+                    loadProfileData();
+                } else showAlert('Update failed', 'error');
+            } catch(e) { showAlert('Error', 'error'); }
+            finally { btn.disabled = false; btn.innerHTML = 'Save Changes'; }
+        });
+
+        // Submit Change Password
+        document.getElementById('changePwdForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPwd = document.getElementById('newPwd').value;
+            const confirm = document.getElementById('confirmPwd').value;
+            if (newPwd !== confirm) { showAlert('Passwords do not match!', 'error'); return; }
+            if (newPwd.length < 6) { showAlert('Password must be at least 6 characters', 'error'); return; }
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Updating...';
+            try {
+                const res = await fetch(`${API_URL}/auth/update-profile`, { 
+                    method: 'PUT', 
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+                    body: JSON.stringify({ 
+                        full_name: currentProfileData.full_name, 
+                        email: currentProfileData.email, 
+                        password: newPwd, 
+                        current_password: document.getElementById('currentPwd').value 
+                    }) 
+                });
+                if (res.ok) { 
+                    showAlert('✅ Password changed! Please login again.', 'success'); 
+                    setTimeout(() => { localStorage.clear(); window.location.href = 'login.html'; }, 2000); 
+                } else showAlert('Current password is incorrect', 'error');
+            } catch(e) { showAlert('Error', 'error'); }
+            finally { btn.disabled = false; btn.innerHTML = 'Update Password'; }
+        });
+
+        // Load Available Tasks
+        async function loadAvailableTasks() {
+            try {
+                const res = await fetch(`${API_URL}/tasks/active`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const tasks = await res.json();
+                const container = document.getElementById('availableTasksContainer');
+                if (!tasks.length) { container.innerHTML = '<div class="empty-state"><p>📭 No available tasks.</p></div>'; return; }
+                container.innerHTML = `<div class="tasks-grid">${tasks.map(t => `<div class="task-card"><span class="task-status status-pending">Pending</span><h3>${escapeHtml(t.task_title)}</h3><div class="task-detail"><i class="fas fa-folder"></i> ${t.task_category}</div><div class="task-detail"><i class="fas fa-map-marker-alt"></i> ${t.location}</div><div class="task-detail"><i class="fas fa-dollar-sign"></i> ${t.budget_range}</div><div class="task-detail"><i class="fas fa-user"></i> ${escapeHtml(t.user_name)}</div><div class="task-actions"><button class="btn btn-primary" onclick="acceptTask(${t.id})"><i class="fas fa-check"></i> Accept Task</button></div></div>`).join('')}</div>`;
+            } catch(e) { console.error(e); }
+        }
+
+        async function acceptTask(taskId) {
+            try {
+                const res = await fetch(`${API_URL}/tasks/accept/${taskId}`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) { showAlert('Task accepted!', 'success'); loadAvailableTasks(); loadMyTasks(); }
+                else showAlert('Failed', 'error');
+            } catch(e) { showAlert('Error', 'error'); }
+        }
+
+        async function loadMyTasks() {
+            try {
+                const res = await fetch(`${API_URL}/tasks/helper-tasks`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const tasks = await res.json();
+                const container = document.getElementById('myTasksContainer');
+                if (!tasks.length) { container.innerHTML = '<div class="empty-state"><p>📭 No assigned tasks.</p></div>'; return; }
+                let totalEarned = 0, completed = 0;
+                tasks.forEach(t => { if (t.status === 'completed') { completed++; totalEarned += parseFloat(t.budget_range?.replace(/[^0-9.-]/g, '') || 0); } });
+                document.getElementById('totalEarned').innerText = `$${totalEarned.toFixed(2)}`;
+                document.getElementById('completedTasks').innerText = completed;
+                container.innerHTML = `<div class="tasks-grid">${tasks.map(t => `<div class="task-card"><span class="task-status status-${t.status}">${t.status?.replace('_', ' ')}</span><h3>${escapeHtml(t.task_title)}</h3><div class="task-detail"><i class="fas fa-dollar-sign"></i> ${t.budget_range}</div><div class="task-detail"><i class="fas fa-user"></i> ${escapeHtml(t.user_name)}</div><div class="task-actions">${t.status === 'accepted' ? `<button class="btn btn-warning" onclick="updateTaskStatus(${t.id}, 'in_progress')"><i class="fas fa-play"></i> Start Work</button>` : ''}${t.status === 'in_progress' ? `<button class="btn btn-success" onclick="completeTask(${t.id})"><i class="fas fa-check-double"></i> Complete</button>` : ''}</div></div>`).join('')}</div>`;
+            } catch(e) { console.error(e); }
+        }
+
+        async function updateTaskStatus(taskId, status) {
+            try {
+                const res = await fetch(`${API_URL}/tasks/status/${taskId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ status }) });
+                if (res.ok) { showAlert(`Task marked as ${status}`, 'success'); loadMyTasks(); }
+                else showAlert('Failed', 'error');
+            } catch(e) { showAlert('Error', 'error'); }
+        }
+
+        async function completeTask(taskId) {
+            if (!confirm('Mark as completed?')) return;
+            try {
+                const res = await fetch(`${API_URL}/tasks/complete/${taskId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ helper_notes: '' }) });
+                if (res.ok) { showAlert('Task completed!', 'success'); loadMyTasks(); loadAvailableTasks(); }
+                else showAlert('Failed', 'error');
+            } catch(e) { showAlert('Error', 'error'); }
+        }
+
+        async function loadHelperReviews() {
+            try {
+                const res = await fetch(`${API_URL}/reviews/helper/${user.id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const reviews = await res.json();
+                const container = document.getElementById('reviewsContainer');
+                if (!reviews?.length) { document.getElementById('rating').innerText = '0.0'; document.getElementById('totalReviews').innerText = '0'; container.innerHTML = '<div class="empty-state"><p>📭 No reviews yet.</p></div>'; return; }
+                let avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
+                document.getElementById('rating').innerText = avg.toFixed(1);
+                document.getElementById('totalReviews').innerText = reviews.length;
+                container.innerHTML = `<h2 style="margin:2rem 0 1rem;"><i class="fas fa-star"></i> My Reviews (${reviews.length})</h2><div class="tasks-grid">${reviews.map(r => `<div class="review-card"><div class="review-header"><div class="review-rating">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div><div>${escapeHtml(r.reviewer_name)}</div><small>${new Date(r.created_at).toLocaleDateString()}</small></div><div class="review-comment">${escapeHtml(r.comment)}</div></div>`).join('')}</div>`;
+            } catch(e) { console.error(e); }
+        }
+
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 80; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 5 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = Math.random() * 15 + 8 + 's';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        loadProfileData();
+        loadAvailableTasks();
+        loadMyTasks();
+        loadHelperReviews();
+    </script>
+</body>
+</html>

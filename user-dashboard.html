@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Life Gap Fixer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-gradient-start: #f8fafc;
+            --bg-gradient-end: #e2e8f0;
+            --surface-glass: rgba(255, 255, 255, 0.65);
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --accent: #7c3aed;
+            --accent-soft: rgba(124, 58, 237, 0.12);
+            --accent-2: #2563eb;
+            --border-light: rgba(0, 0, 0, 0.08);
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --btn-secondary-bg: rgba(0, 0, 0, 0.04);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+        }
+
+        body.dark {
+            --bg-gradient-start: #0f172a;
+            --bg-gradient-end: #020617;
+            --surface-glass: rgba(15, 23, 42, 0.65);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent: #8b5cf6;
+            --accent-2: #38bdf8;
+            --border-light: rgba(255, 255, 255, 0.08);
+            --card-bg: rgba(15, 23, 42, 0.7);
+            --btn-secondary-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-primary);
+            transition: all 0.4s;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleFloat linear infinite;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.15; }
+            80% { opacity: 0.15; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .orb-1, .orb-2 {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
+            pointer-events: none;
+            animation: orbFloat 20s infinite alternate;
+        }
+
+        .orb-1 { width: 300px; height: 300px; background: radial-gradient(circle, var(--accent), transparent); top: -100px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, var(--accent-2), transparent); bottom: -150px; right: -150px; animation-delay: -5s; }
+
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(5%, 5%) scale(1.1); }
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20%;
+            left: -10%;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, rgba(56, 189, 248, 0.08) 60%, transparent 80%);
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+            animation: floatBlob 18s infinite alternate;
+        }
+
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+            100% { transform: translate(5%, 5%) scale(1.1); opacity: 1; }
+        }
+
+        .page-shell { position: relative; z-index: 2; width: min(1280px, calc(100% - 2.5rem)); margin: 0 auto; padding: 1.5rem 0 3rem; }
+        
+        /* Premium Header */
+        .site-header {
+            position: sticky;
+            top: 1.2rem;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            padding: 0.7rem 2rem;
+            margin-bottom: 2rem;
+            border-radius: 3rem;
+            background: var(--surface-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo { 
+            font-size: 1.45rem; font-weight: 800; 
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            background-size: 200% auto;
+            background-clip: text; -webkit-background-clip: text; color: transparent; 
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .logo:hover { transform: scale(1.02); letter-spacing: 1px; }
+
+        .main-nav { display: flex; flex-wrap: wrap; gap: 0.25rem; background: rgba(0, 0, 0, 0.02); padding: 0.25rem; border-radius: 3rem; }
+        .main-nav a { 
+            padding: 0.6rem 1.3rem; color: var(--text-secondary); font-weight: 600; font-size: 0.9rem; 
+            border-radius: 2rem; transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1); 
+            text-decoration: none; cursor: pointer; position: relative;
+        }
+        .main-nav a::after {
+            content: ''; position: absolute; bottom: 0; left: 50%; width: 0; height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: all 0.3s ease; transform: translateX(-50%);
+        }
+        .main-nav a:hover::after { width: 60%; }
+        .main-nav a:hover { background: var(--accent-soft); color: var(--accent); transform: translateY(-2px); }
+
+        .theme-toggle {
+            background: var(--surface-glass); backdrop-filter: blur(12px); border: 1px solid var(--border-light);
+            border-radius: 3rem; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem;
+            cursor: pointer; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            font-weight: 600; font-size: 0.85rem; color: var(--text-secondary);
+            position: relative; overflow: hidden;
+        }
+        .theme-toggle::before {
+            content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0;
+            background: radial-gradient(circle, var(--accent-soft), transparent);
+            border-radius: 50%; transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .theme-toggle:hover::before { width: 200px; height: 200px; }
+        .theme-toggle svg { width: 20px; height: 20px; transition: transform 0.5s ease; }
+        .theme-toggle:hover svg { transform: rotate(180deg); }
+
+        /* Dashboard Layout */
+        .dashboard-container { padding: 1rem 0; }
+        .dashboard-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .dashboard-header h1 { 
+            font-size: 1.8rem; 
+            background: linear-gradient(135deg, var(--text-primary), var(--accent));
+            background-size: 200% auto;
+            background-clip: text; -webkit-background-clip: text; color: transparent;
+            animation: gradientShift 3s ease infinite;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Amazon-style Profile Dropdown in Top Right */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            transition: all 0.3s;
+            background: var(--accent-soft);
+            border: 1px solid transparent;
+        }
+
+        .profile-trigger:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .profile-trigger:hover .profile-name-text,
+        .profile-trigger:hover .profile-trigger-icon,
+        .profile-trigger:hover .profile-avatar-small {
+            color: white;
+        }
+
+        .profile-avatar-small {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+        }
+
+        .profile-name-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .profile-trigger-icon {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+
+        .profile-dropdown.active .profile-trigger-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 280px;
+            background: white;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            z-index: 1000;
+        }
+
+        body.dark .dropdown-menu {
+            background: #1e293b;
+            border-color: #334155;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .profile-dropdown.active .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        body.dark .dropdown-header {
+            border-bottom-color: #334155;
+        }
+
+        .dropdown-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+        }
+
+        .dropdown-user-info {
+            flex: 1;
+        }
+
+        .dropdown-user-name {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .dropdown-user-email {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .dropdown-items {
+            padding: 0.5rem 0;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            font-size: 1rem;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        body.dark .dropdown-divider {
+            background: #334155;
+        }
+
+        .logout-item {
+            color: var(--danger);
+        }
+
+        .logout-item:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* Analytics Cards Section */
+        .analytics-section {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .analytics-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        body.dark .analytics-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .analytics-card:nth-child(1) { animation-delay: 0.05s; }
+        .analytics-card:nth-child(2) { animation-delay: 0.1s; }
+        .analytics-card:nth-child(3) { animation-delay: 0.15s; }
+        .analytics-card:nth-child(4) { animation-delay: 0.2s; }
+
+        .analytics-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .analytics-card:hover::before {
+            left: 100%;
+        }
+
+        .analytics-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.15);
+            border-color: var(--accent);
+        }
+
+        .analytics-icon {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .analytics-card:hover .analytics-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .analytics-info {
+            flex: 1;
+        }
+
+        .analytics-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .analytics-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .analytics-trend {
+            font-size: 0.7rem;
+            margin-top: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .trend-up {
+            color: var(--success);
+        }
+
+        .trend-down {
+            color: var(--danger);
+        }
+
+        /* Professional Profile Edit Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        
+        .modal-content {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            max-width: 550px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalPop 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+        }
+        
+        body.dark .modal-content {
+            background: #1e293b;
+        }
+        
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        body.dark .modal-header {
+            border-bottom-color: #334155;
+        }
+        
+        .modal-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-icon i {
+            font-size: 1.8rem;
+            color: white;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .modal-header p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Avatar Upload Section */
+        .avatar-upload-section {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .avatar-upload-preview {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 3rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .avatar-upload-preview:hover {
+            transform: scale(1.05);
+        }
+        
+        .avatar-upload-preview:hover .avatar-overlay {
+            opacity: 1;
+        }
+        
+        .avatar-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.5rem;
+            font-size: 0.7rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            text-align: center;
+        }
+        
+        .avatar-input {
+            display: none;
+        }
+        
+        .avatar-upload-section small {
+            display: block;
+            margin-top: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* Professional Form Styles */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 0.8rem;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        
+        body.dark .form-group input {
+            border-color: #334155;
+            background: #0f172a;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        body.dark .modal-actions {
+            border-top-color: #334155;
+        }
+
+        /* Buttons */
+        .btn { 
+            display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.7rem 1.5rem; 
+            border-radius: 2rem; font-weight: 600; transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.2); 
+            cursor: pointer; border: none; font-size: 0.9rem; text-decoration: none;
+            position: relative; overflow: hidden;
+        }
+        .btn::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        .btn:hover::before { left: 100%; }
+        .btn-primary { background: linear-gradient(125deg, var(--accent), var(--accent-2)); color: white; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4); }
+        .btn-secondary { background: #f1f5f9; border: 1px solid #e2e8f0; color: var(--text-primary); }
+        body.dark .btn-secondary { background: #334155; border-color: #475569; color: white; }
+        .btn-secondary:hover { transform: translateY(-2px); border-color: var(--accent); background: var(--accent-soft); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4); }
+        .btn-sm { padding: 0.4rem 1rem; font-size: 0.8rem; }
+
+        /* Alert */
+        .alert { padding: 1rem; border-radius: 1rem; margin-bottom: 1rem; display: none; }
+        .alert.show { display: block; animation: slideDown 0.3s ease; }
+        .alert-success { background: rgba(16, 185, 129, 0.2); border: 1px solid var(--success); color: var(--success); }
+        .alert-error { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); color: var(--danger); }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Task Cards */
+        .tasks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+        .task-card { 
+            background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 1.5rem; 
+            padding: 1.5rem; border: 1px solid var(--border-light); 
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            opacity: 0; transform: translateY(20px);
+            animation: cardReveal 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.2) forwards;
+        }
+        @keyframes cardReveal { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .task-card:hover { transform: translateY(-6px) scale(1.02); border-color: var(--accent); box-shadow: 0 20px 40px -15px rgba(124, 58, 237, 0.3); }
+
+        .task-status { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; margin-bottom: 0.75rem; text-transform: uppercase; }
+        .status-pending { background: var(--warning); color: #fff; animation: pulse 2s infinite; }
+        .status-accepted { background: var(--info); color: #fff; }
+        .status-in_progress { background: var(--accent); color: #fff; }
+        .status-completed { background: var(--success); color: #fff; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+
+        .task-card h3 { font-size: 1.2rem; margin-bottom: 0.75rem; }
+        .task-detail { color: var(--text-secondary); font-size: 0.85rem; margin: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem; }
+        .task-actions { margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+        /* Other Modal Styles for Task Creation */
+        .modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); z-index: 1000; 
+            align-items: center; justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal.active { display: flex; }
+        
+        .modal-content { 
+            background: white; border-radius: 1.5rem; 
+            padding: 2rem; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; 
+            animation: modalPop 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            position: relative;
+        }
+        
+        body.dark .modal-content {
+            background: #1e293b;
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        body.dark .modal-header {
+            border-bottom-color: #334155;
+        }
+        
+        .modal-header i {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .modal-header p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { 
+            display: block; margin-bottom: 0.5rem; font-weight: 600; 
+            color: var(--text-secondary); font-size: 0.85rem;
+        }
+        .form-group input, .form-group select, .form-group textarea { 
+            width: 100%; padding: 0.8rem 1rem; border-radius: 0.8rem; 
+            border: 1px solid #e2e8f0; background: #f8fafc; 
+            color: var(--text-primary); font-size: 0.95rem; transition: all 0.3s;
+        }
+        body.dark .form-group input, body.dark .form-group select, body.dark .form-group textarea {
+            border-color: #334155;
+            background: #0f172a;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { 
+            outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+        
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; }
+        body.dark .modal-actions { border-top-color: #334155; }
+
+        /* Star Rating */
+        .star-rating { 
+            display: flex; gap: 0.8rem; font-size: 2rem; cursor: pointer; 
+            justify-content: center; margin: 1rem 0; 
+            background: var(--accent-soft);
+            padding: 1rem;
+            border-radius: 3rem;
+        }
+        .star { color: #cbd5e1; transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.2); font-size: 2rem; }
+        .star.active { color: #fbbf24; transform: scale(1.15); }
+        .star:hover { transform: scale(1.25); color: #fbbf24; cursor: pointer; }
+
+        /* Payment Methods */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .payment-method {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 0.8rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        body.dark .payment-method {
+            background: #0f172a;
+            border-color: #334155;
+        }
+        
+        .payment-method:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .payment-method.selected { border-color: var(--accent); background: var(--accent-soft); }
+        .payment-method i { font-size: 1.5rem; display: block; margin-bottom: 0.3rem; }
+        .payment-method span { font-size: 0.7rem; font-weight: 600; }
+
+        .empty-state { text-align: center; padding: 3rem; background: var(--card-bg); border-radius: 1.5rem; border: 1px solid var(--border-light); }
+        .footer-panel { text-align: center; padding: 2rem 0 1rem; border-top: 1px solid var(--border-light); color: var(--text-muted); margin-top: 2rem; }
+
+        @media (max-width: 640px) {
+            .site-header { flex-wrap: wrap; }
+            .main-nav { order: 3; width: 100%; justify-content: center; margin-top: 0.5rem; }
+            .dashboard-header { flex-direction: column; text-align: center; }
+            .analytics-section { grid-template-columns: repeat(2, 1fr); }
+            .form-row { grid-template-columns: 1fr; }
+            .tasks-grid { grid-template-columns: 1fr; }
+            .payment-methods { grid-template-columns: 1fr; }
+            .dropdown-menu { width: 260px; right: -20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Particles -->
+    <div class="particles" id="particles"></div>
+    <div class="orb-1"></div>
+    <div class="orb-2"></div>
+
+    <div class="page-shell">
+        <header class="site-header">
+            <a class="logo" href="index.html">✨ Life Gap Fixer</a>
+            <nav class="main-nav">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="services.html">Services</a>
+            </nav>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <!-- Amazon-style Profile Dropdown -->
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="profile-trigger" id="profileTrigger">
+                        <div class="profile-avatar-small" id="navAvatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span class="profile-name-text" id="navUserName">Account</span>
+                        <i class="fas fa-chevron-down profile-trigger-icon"></i>
+                    </div>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-header">
+                            <div class="dropdown-avatar" id="dropdownAvatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="dropdown-user-info">
+                                <div class="dropdown-user-name" id="dropdownUserName">Loading...</div>
+                                <div class="dropdown-user-email" id="dropdownUserEmail">Loading...</div>
+                            </div>
+                        </div>
+                        <div class="dropdown-items">
+                            <div class="dropdown-item" onclick="openEditProfileModal()">
+                                <i class="fas fa-user-edit"></i>
+                                <span>Your Profile</span>
+                            </div>
+                            <div class="dropdown-item" onclick="openChangePasswordModal()">
+                                <i class="fas fa-key"></i>
+                                <span>Change Password</span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-item" onclick="scrollToTasks()">
+                                <i class="fas fa-tasks"></i>
+                                <span>Your Tasks</span>
+                            </div>
+                            <div class="dropdown-item" onclick="window.location.href='#'">
+                                <i class="fas fa-credit-card"></i>
+                                <span>Payments</span>
+                            </div>
+                            <div class="dropdown-item" onclick="window.location.href='#'">
+                                <i class="fas fa-bell"></i>
+                                <span>Notifications</span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-item" onclick="window.location.href='#'">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help Center</span>
+                            </div>
+                            <div class="dropdown-item logout-item" id="dropdownLogout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Sign Out</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="theme-toggle" id="themeToggle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                    </svg>
+                    <span>Light/Dark</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1>📋 My Dashboard</h1>
+                <button class="btn btn-primary" onclick="openCreateTaskModal()">
+                    <i class="fas fa-plus-circle"></i> Create New Task
+                </button>
+            </div>
+            <div id="alert" class="alert"></div>
+
+            <!-- Analytics Section -->
+            <div class="analytics-section" id="analyticsSection">
+                <div class="analytics-card">
+                    <div class="analytics-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="analytics-info">
+                        <div class="analytics-value" id="totalTasksCount">0</div>
+                        <div class="analytics-label">Total Tasks</div>
+                        <div class="analytics-trend trend-up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+12% this month</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="analytics-info">
+                        <div class="analytics-value" id="totalSpent">$0</div>
+                        <div class="analytics-label">Money Spent</div>
+                        <div class="analytics-trend trend-up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+8% this month</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="analytics-info">
+                        <div class="analytics-value" id="averageRating">0.0</div>
+                        <div class="analytics-label">Average Rating</div>
+                        <div class="analytics-trend trend-up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+0.5 vs last month</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="analytics-info">
+                        <div class="analytics-value" id="completedTasksCount">0</div>
+                        <div class="analytics-label">Completed Tasks</div>
+                        <div class="analytics-trend trend-up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+5 this month</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Container -->
+            <div id="tasksContainer">
+                <div class="empty-state loading-task">
+                    <i class="fas fa-spinner fa-pulse" style="font-size: 2rem; color: var(--accent);"></i>
+                    <p style="margin-top: 1rem;">Loading your tasks...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional Edit Profile Modal -->
+        <div id="editProfileModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-icon">
+                        <i class="fas fa-user-edit"></i>
+                    </div>
+                    <div>
+                        <h2>Edit Profile</h2>
+                        <p>Update your personal information and profile photo</p>
+                    </div>
+                </div>
+                <form id="editProfileForm">
+                    <div class="avatar-upload-section">
+                        <div class="avatar-upload-preview" id="avatarPreview" onclick="document.getElementById('avatarInput').click()">
+                            <i class="fas fa-camera"></i>
+                            <div class="avatar-overlay">Change Photo</div>
+                        </div>
+                        <input type="file" id="avatarInput" class="avatar-input" accept="image/jpeg,image/png,image/jpg">
+                        <small>Click on avatar to upload profile picture (JPEG/PNG only)</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="edit_full_name" required placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="edit_email" required placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="edit_phone" placeholder="Enter your phone number">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditProfileModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Professional Change Password Modal -->
+        <div id="changePasswordModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <div>
+                        <h2>Change Password</h2>
+                        <p>Update your password to keep your account secure</p>
+                    </div>
+                </div>
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" id="current_password" required placeholder="Enter current password">
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" id="new_password" required placeholder="Enter new password (min 6 characters)">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" id="confirm_password" required placeholder="Confirm new password">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeChangePasswordModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Create Task Modal -->
+        <div id="createTaskModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <i class="fas fa-plus-circle"></i>
+                    <div>
+                        <h2>Create New Task</h2>
+                        <p>Fill in the details below to post your task</p>
+                    </div>
+                </div>
+                <form id="createTaskForm">
+                    <div class="form-group">
+                        <label>Task Title</label>
+                        <input type="text" id="task_title" required placeholder="e.g., Fix leaking pipe, Clean apartment">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="task_category" required>
+                                <option value="Plumbing">🔧 Plumbing</option>
+                                <option value="Electrical">⚡ Electrical</option>
+                                <option value="Cleaning">🧹 Cleaning</option>
+                                <option value="Carpentry">🔨 Carpentry</option>
+                                <option value="Moving">🚚 Moving</option>
+                                <option value="Delivery">📦 Delivery</option>
+                                <option value="Other">📌 Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" id="location" required placeholder="City, Area">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Budget Range</label>
+                            <input type="text" id="budget_range" required placeholder="e.g., $50-$100">
+                        </div>
+                        <div class="form-group">
+                            <label>Deadline</label>
+                            <input type="date" id="deadline" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Urgency Level</label>
+                        <select id="urgency">
+                            <option value="low">🟢 Low - Flexible timeline</option>
+                            <option value="medium" selected>🟡 Medium - Within a week</option>
+                            <option value="high">🔴 High - ASAP</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="task_description" rows="4" required placeholder="Describe your task in detail..."></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeCreateTaskModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Post Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Review Modal -->
+        <div id="reviewModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <i class="fas fa-star"></i>
+                    <div>
+                        <h2>Leave a Review</h2>
+                        <p>Share your experience with the helper</p>
+                    </div>
+                </div>
+                <form id="reviewForm">
+                    <input type="hidden" id="reviewTaskId">
+                    <input type="hidden" id="reviewHelperId">
+                    <div class="form-group">
+                        <label>Your Rating</label>
+                        <div class="star-rating" id="starRating">
+                            <span class="star" data-rating="1">★</span>
+                            <span class="star" data-rating="2">★</span>
+                            <span class="star" data-rating="3">★</span>
+                            <span class="star" data-rating="4">★</span>
+                            <span class="star" data-rating="5">★</span>
+                        </div>
+                        <input type="hidden" id="rating" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Your Review</label>
+                        <textarea id="comment" rows="4" required placeholder="Share your experience..."></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeReviewModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Payment Modal -->
+        <div id="paymentModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <i class="fas fa-credit-card"></i>
+                    <div>
+                        <h2>Make Payment</h2>
+                        <p>Secure payment to release funds</p>
+                    </div>
+                </div>
+                <form id="paymentForm">
+                    <input type="hidden" id="paymentTaskId">
+                    <input type="hidden" id="paymentHelperEmail">
+                    <div class="form-group">
+                        <label>Task Amount</label>
+                        <input type="text" id="paymentAmount" readonly style="background: var(--accent-soft); font-weight: bold; text-align: center;">
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <div class="payment-methods">
+                            <div class="payment-method" data-method="credit_card"><i class="fab fa-cc-visa"></i><span>Credit Card</span></div>
+                            <div class="payment-method" data-method="paypal"><i class="fab fa-paypal"></i><span>PayPal</span></div>
+                            <div class="payment-method" data-method="bank_transfer"><i class="fas fa-university"></i><span>Bank Transfer</span></div>
+                        </div>
+                        <input type="hidden" id="paymentMethod" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Card Number (Demo)</label>
+                        <input type="text" placeholder="4111 1111 1111 1111" value="4111 1111 1111 1111">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Expiry Date</label><input type="text" placeholder="MM/YY" value="12/25"></div>
+                        <div class="form-group"><label>CVV</label><input type="text" placeholder="123" value="123"></div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closePaymentModal()">Cancel</button>
+                        <button type="submit" class="btn btn-success">Pay Now</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <footer class="footer-panel">
+            <p>✨ Life Gap Fixer — bridging tasks and helpers with elegance & efficiency. © 2025</p>
+        </footer>
+    </div>
+
+    <script>
+        // Create Particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 80; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 5 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = Math.random() * 15 + 8 + 's';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        const API_URL = 'http://localhost:5000/api';
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!token) window.location.href = 'login.html';
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
+        themeToggle?.addEventListener('click', () => { 
+            document.body.classList.toggle('dark'); 
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light'); 
+        });
+
+        // Profile Dropdown Toggle
+        const profileDropdown = document.getElementById('profileDropdown');
+        const profileTrigger = document.getElementById('profileTrigger');
+
+        profileTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!profileDropdown.contains(e.target)) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+
+        // Logout from dropdown
+        document.getElementById('dropdownLogout').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        });
+
+        // Scroll to Tasks Section
+        function scrollToTasks() {
+            const tasksContainer = document.getElementById('tasksContainer');
+            if (tasksContainer) {
+                tasksContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            profileDropdown.classList.remove('active');
+        }
+
+        function showAlert(message, type) { 
+            const alertDiv = document.getElementById('alert'); 
+            alertDiv.textContent = message; 
+            alertDiv.className = `alert alert-${type} show`; 
+            setTimeout(() => alertDiv.classList.remove('show'), 5000); 
+        }
+        
+        function escapeHtml(text) { 
+            if (!text) return ''; 
+            const div = document.createElement('div'); 
+            div.textContent = text; 
+            return div.innerHTML; 
+        }
+
+        let currentProfile = {};
+        let avatarBase64 = null;
+
+        // Load User Profile
+        async function loadUserProfile() {
+            try {
+                const response = await fetch(`${API_URL}/auth/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                currentProfile = await response.json();
+                
+                const initial = currentProfile.full_name?.charAt(0).toUpperCase() || 'U';
+                
+                // Update dropdown
+                document.getElementById('dropdownUserName').innerText = currentProfile.full_name;
+                document.getElementById('dropdownUserEmail').innerText = currentProfile.email;
+                document.getElementById('navUserName').innerText = currentProfile.full_name.split(' ')[0];
+                
+                // Load saved avatar from localStorage
+                const savedAvatar = localStorage.getItem(`avatar_${currentProfile.id}`);
+                if (savedAvatar) {
+                    document.getElementById('navAvatar').style.backgroundImage = `url(${savedAvatar})`;
+                    document.getElementById('navAvatar').innerHTML = '';
+                    document.getElementById('dropdownAvatar').style.backgroundImage = `url(${savedAvatar})`;
+                    document.getElementById('dropdownAvatar').innerHTML = '';
+                    document.getElementById('avatarPreview').style.backgroundImage = `url(${savedAvatar})`;
+                    document.getElementById('avatarPreview').innerHTML = '<div class="avatar-overlay">Change Photo</div>';
+                } else {
+                    document.getElementById('navAvatar').innerHTML = `<span style="font-size: 1rem;">${initial}</span>`;
+                    document.getElementById('dropdownAvatar').innerHTML = `<span style="font-size: 1.5rem;">${initial}</span>`;
+                    document.getElementById('avatarPreview').innerHTML = `<i class="fas fa-camera"></i><div class="avatar-overlay">Change Photo</div>`;
+                    document.getElementById('avatarPreview').style.backgroundImage = '';
+                }
+                
+                // Set edit form values
+                document.getElementById('edit_full_name').value = currentProfile.full_name;
+                document.getElementById('edit_email').value = currentProfile.email;
+                document.getElementById('edit_phone').value = currentProfile.phone || '';
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        // Avatar Upload
+        document.getElementById('avatarInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && (file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/jpg')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    avatarBase64 = event.target.result;
+                    document.getElementById('avatarPreview').style.backgroundImage = `url(${avatarBase64})`;
+                    document.getElementById('avatarPreview').innerHTML = '<div class="avatar-overlay">Change Photo</div>';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please select a valid image file (JPEG or PNG)');
+            }
+        });
+
+        // Edit Profile Functions
+        function openEditProfileModal() {
+            loadUserProfile();
+            document.getElementById('editProfileModal').classList.add('active');
+            profileDropdown.classList.remove('active');
+        }
+        
+        function closeEditProfileModal() {
+            document.getElementById('editProfileModal').classList.remove('active');
+        }
+        
+        document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const updateData = {
+                full_name: document.getElementById('edit_full_name').value,
+                email: document.getElementById('edit_email').value,
+                phone: document.getElementById('edit_phone').value
+            };
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving...';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/update-profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                if (response.ok) {
+                    if (avatarBase64) {
+                        localStorage.setItem(`avatar_${currentProfile.id}`, avatarBase64);
+                    }
+                    showAlert('✅ Profile updated successfully!', 'success');
+                    closeEditProfileModal();
+                    loadUserProfile();
+                    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+                    storedUser.full_name = updateData.full_name;
+                    storedUser.email = updateData.email;
+                    storedUser.phone = updateData.phone;
+                    localStorage.setItem('user', JSON.stringify(storedUser));
+                } else {
+                    const data = await response.json();
+                    showAlert(data.message || 'Update failed', 'error');
+                }
+            } catch (error) {
+                showAlert('Error updating profile', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Save Changes';
+            }
+        });
+
+        // Change Password Functions
+        function openChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('active');
+            profileDropdown.classList.remove('active');
+            document.getElementById('changePasswordForm').reset();
+        }
+        
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.remove('active');
+            document.getElementById('changePasswordForm').reset();
+        }
+        
+        document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('current_password').value;
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (!currentPassword) {
+                showAlert('Please enter your current password', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showAlert('New passwords do not match!', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showAlert('Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Updating...';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/update-profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        full_name: currentProfile.full_name,
+                        email: currentProfile.email,
+                        phone: currentProfile.phone,
+                        password: newPassword,
+                        current_password: currentPassword
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert('✅ Password changed successfully! Please login again.', 'success');
+                    setTimeout(() => {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    showAlert(data.message || 'Current password is incorrect or update failed', 'error');
+                }
+            } catch (error) {
+                console.error('Password change error:', error);
+                showAlert('Error changing password. Please check your current password.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Update Password';
+            }
+        });
+
+        // Update Analytics based on tasks
+        function updateAnalytics(tasks) {
+            if (!tasks || tasks.length === 0) {
+                document.getElementById('totalTasksCount').innerText = '0';
+                document.getElementById('completedTasksCount').innerText = '0';
+                document.getElementById('totalSpent').innerText = '$0';
+                document.getElementById('averageRating').innerText = '0.0';
+                return;
+            }
+            
+            // Total tasks
+            const totalTasks = tasks.length;
+            document.getElementById('totalTasksCount').innerText = totalTasks;
+            
+            // Completed tasks
+            const completedTasks = tasks.filter(t => t.status === 'completed').length;
+            document.getElementById('completedTasksCount').innerText = completedTasks;
+            
+            // Calculate total spent (from completed tasks with helper)
+            let totalSpent = 0;
+            tasks.forEach(task => {
+                if (task.status === 'completed' && task.budget_range) {
+                    const amount = parseFloat(task.budget_range.replace(/[^0-9.-]/g, ''));
+                    if (!isNaN(amount)) totalSpent += amount;
+                }
+            });
+            document.getElementById('totalSpent').innerText = `$${totalSpent.toFixed(2)}`;
+            
+            // Calculate average rating (would need review data, using sample for now)
+            // This would normally come from reviews API, using sample data
+            const avgRating = 4.8;
+            document.getElementById('averageRating').innerText = avgRating.toFixed(1);
+        }
+
+        // Payment Method Selection
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('click', () => {
+                document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+                method.classList.add('selected');
+                document.getElementById('paymentMethod').value = method.dataset.method;
+            });
+        });
+
+        // Star Rating
+        let selectedRating = 0;
+        function initStarRating() {
+            const stars = document.querySelectorAll('#starRating .star');
+            stars.forEach(star => {
+                star.removeEventListener('click', star.clickHandler);
+                star.clickHandler = () => {
+                    selectedRating = parseInt(star.dataset.rating);
+                    stars.forEach(s => s.classList.remove('active'));
+                    for (let i = 0; i < selectedRating; i++) {
+                        stars[i].classList.add('active');
+                    }
+                    document.getElementById('rating').value = selectedRating;
+                    stars.forEach(s => s.style.animation = 'none');
+                    setTimeout(() => stars.forEach(s => s.style.animation = ''), 10);
+                };
+                star.addEventListener('click', star.clickHandler);
+            });
+        }
+
+        async function loadUserTasks() {
+            try {
+                const response = await fetch(`${API_URL}/tasks/my-tasks`, { 
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
+                if (response.status === 401) { 
+                    localStorage.removeItem('token'); 
+                    window.location.href = 'login.html'; 
+                    return; 
+                }
+                const tasks = await response.json();
+                const container = document.getElementById('tasksContainer');
+                
+                // Update analytics with tasks data
+                updateAnalytics(tasks);
+                
+                if (!tasks || tasks.length === 0) { 
+                    container.innerHTML = `<div class="empty-state"><i class="fas fa-tasks" style="font-size: 3rem; color: var(--accent-soft); margin-bottom: 1rem;"></i><p>📭 You haven't posted any tasks yet.</p><button class="btn btn-primary" onclick="openCreateTaskModal()" style="margin-top: 1rem;"><i class="fas fa-plus"></i> Create Your First Task</button></div>`; 
+                    return; 
+                }
+                
+                container.innerHTML = `<div class="tasks-grid">${tasks.map((task, index) => `
+                    <div class="task-card" style="animation-delay: ${index * 0.05}s">
+                        <span class="task-status status-${task.status}">
+                            <i class="fas ${task.status === 'in_progress' ? 'fa-spinner fa-pulse' : task.status === 'completed' ? 'fa-check-circle' : 'fa-clock'}"></i>
+                            ${task.status?.replace('_', ' ') || 'Pending'}
+                        </span>
+                        <h3>${escapeHtml(task.task_title)}</h3>
+                        <div class="task-detail"><i class="fas fa-folder"></i> ${task.task_category || 'Uncategorized'}</div>
+                        <div class="task-detail"><i class="fas fa-map-marker-alt"></i> ${task.location || 'Not specified'}</div>
+                        <div class="task-detail"><i class="fas fa-dollar-sign"></i> ${task.budget_range || 'Negotiable'}</div>
+                        <div class="task-detail"><i class="fas fa-calendar"></i> Deadline: ${task.deadline ? new Date(task.deadline).toLocaleDateString() : 'Not set'}</div>
+                        <div class="task-detail"><i class="fas fa-align-left"></i> ${escapeHtml(task.task_description?.substring(0, 100))}${task.task_description?.length > 100 ? '...' : ''}</div>
+                        ${task.helper_name ? `<div class="task-detail"><i class="fas fa-user-circle"></i> Helper: ${escapeHtml(task.helper_name)}</div>` : ''}
+                        ${task.helper_notes ? `<div class="task-detail"><i class="fas fa-sticky-note"></i> Helper Notes: ${escapeHtml(task.helper_notes)}</div>` : ''}
+                        <div class="task-actions">
+                            ${task.status === 'pending' ? `<button class="btn btn-danger btn-sm" onclick="deleteTask(${task.id})"><i class="fas fa-trash"></i> Delete</button>` : ''}
+                            ${task.status === 'completed' ? `
+                                <button class="btn btn-primary btn-sm" onclick="openReviewModal(${task.id}, ${task.helper_id})"><i class="fas fa-star"></i> Leave Review</button>
+                                <button class="btn btn-success btn-sm" onclick="openPaymentModal(${task.id}, '${task.helper_email}', '${task.budget_range}')"><i class="fas fa-credit-card"></i> Make Payment</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('')}</div>`;
+            } catch (error) { 
+                console.error('Error loading tasks:', error); 
+                showAlert('Error loading tasks', 'error'); 
+            }
+        }
+
+        // Create Task
+        document.getElementById('createTaskForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Creating...';
+            
+            const taskData = { 
+                task_title: document.getElementById('task_title').value, 
+                task_category: document.getElementById('task_category').value, 
+                location: document.getElementById('location').value, 
+                budget_range: document.getElementById('budget_range').value, 
+                deadline: document.getElementById('deadline').value, 
+                urgency: document.getElementById('urgency').value, 
+                task_description: document.getElementById('task_description').value 
+            };
+            try {
+                const response = await fetch(`${API_URL}/tasks/create`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+                    body: JSON.stringify(taskData) 
+                });
+                if (response.ok) { 
+                    showAlert('✅ Task created successfully!', 'success'); 
+                    closeCreateTaskModal(); 
+                    document.getElementById('createTaskForm').reset(); 
+                    loadUserTasks(); 
+                } else { 
+                    const data = await response.json(); 
+                    showAlert(data.message || 'Failed to create task', 'error'); 
+                }
+            } catch (error) { 
+                showAlert('Error creating task', 'error'); 
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post Task';
+            }
+        });
+
+        // Delete Task
+        async function deleteTask(taskId) { 
+            if (confirm('Are you sure you want to delete this task?')) { 
+                try { 
+                    const response = await fetch(`${API_URL}/tasks/${taskId}`, { 
+                        method: 'DELETE', 
+                        headers: { 'Authorization': `Bearer ${token}` } 
+                    }); 
+                    if (response.ok) { 
+                        showAlert('Task deleted successfully', 'success'); 
+                        loadUserTasks(); 
+                    } else { 
+                        showAlert('Failed to delete task', 'error'); 
+                    } 
+                } catch (error) { 
+                    showAlert('Error deleting task', 'error'); 
+                } 
+            } 
+        }
+
+        // Review Functions
+        function openReviewModal(taskId, helperId) { 
+            document.getElementById('reviewTaskId').value = taskId; 
+            document.getElementById('reviewHelperId').value = helperId; 
+            selectedRating = 0; 
+            document.getElementById('rating').value = ''; 
+            document.getElementById('comment').value = ''; 
+            document.querySelectorAll('#starRating .star').forEach(s => s.classList.remove('active')); 
+            document.getElementById('reviewModal').classList.add('active'); 
+        }
+        
+        function closeReviewModal() { 
+            document.getElementById('reviewModal').classList.remove('active'); 
+        }
+        
+        document.getElementById('reviewForm').addEventListener('submit', async (e) => { 
+            e.preventDefault(); 
+            const reviewData = { 
+                taskId: parseInt(document.getElementById('reviewTaskId').value), 
+                revieweeId: parseInt(document.getElementById('reviewHelperId').value), 
+                rating: parseInt(document.getElementById('rating').value), 
+                comment: document.getElementById('comment').value 
+            }; 
+            if (!reviewData.rating) { 
+                alert('Please select a rating'); 
+                return; 
+            } 
+            if (!reviewData.comment.trim()) { 
+                alert('Please enter your review'); 
+                return; 
+            } 
+            try { 
+                const response = await fetch(`${API_URL}/reviews/add`, { 
+                    method: 'POST', 
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${token}` 
+                    }, 
+                    body: JSON.stringify(reviewData) 
+                }); 
+                const data = await response.json();
+                if (response.ok) { 
+                    alert('Review submitted successfully!'); 
+                    closeReviewModal(); 
+                    loadUserTasks(); 
+                } else { 
+                    alert(data.message || 'Failed to submit review'); 
+                } 
+            } catch (error) { 
+                alert('Error submitting review'); 
+                console.error('Review error:', error); 
+            } 
+        });
+
+        // Payment Functions
+        function openPaymentModal(taskId, helperEmail, budgetRange) { 
+            document.getElementById('paymentTaskId').value = taskId; 
+            document.getElementById('paymentHelperEmail').value = helperEmail; 
+            const amount = parseFloat(budgetRange?.replace(/[^0-9.-]/g, '') || '50'); 
+            document.getElementById('paymentAmount').value = `$${amount.toFixed(2)}`; 
+            document.getElementById('paymentMethod').value = '';
+            document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+            document.getElementById('paymentModal').classList.add('active'); 
+        }
+        
+        function closePaymentModal() { 
+            document.getElementById('paymentModal').classList.remove('active'); 
+        }
+        
+        document.getElementById('paymentForm').addEventListener('submit', async (e) => { 
+            e.preventDefault(); 
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            if (!paymentMethod) { 
+                showAlert('Please select a payment method', 'error'); 
+                return; 
+            } 
+            const paymentData = { 
+                taskId: parseInt(document.getElementById('paymentTaskId').value), 
+                amount: parseFloat(document.getElementById('paymentAmount').value.replace('$', '')), 
+                paymentMethod: paymentMethod 
+            }; 
+            try { 
+                const response = await fetch(`${API_URL}/payments/create`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+                    body: JSON.stringify(paymentData) 
+                }); 
+                if (response.ok) { 
+                    const data = await response.json(); 
+                    showAlert(`✅ Payment successful! Transaction ID: ${data.transactionId}`, 'success'); 
+                    closePaymentModal(); 
+                    loadUserTasks(); 
+                } else { 
+                    const data = await response.json(); 
+                    showAlert(data.message || 'Payment failed', 'error'); 
+                } 
+            } catch (error) { 
+                showAlert('Error processing payment', 'error'); 
+            } 
+        });
+
+        function openCreateTaskModal() { 
+            document.getElementById('createTaskModal').classList.add('active'); 
+        }
+        
+        function closeCreateTaskModal() { 
+            document.getElementById('createTaskModal').classList.remove('active'); 
+            document.getElementById('createTaskForm').reset(); 
+        }
+        
+        window.onclick = function(event) { 
+            if (event.target.classList.contains('modal')) 
+                event.target.classList.remove('active'); 
+        }
+        
+        // Initialize
+        initStarRating();
+        loadUserProfile();
+        loadUserTasks();
+    </script>
+</body>
+</html>
