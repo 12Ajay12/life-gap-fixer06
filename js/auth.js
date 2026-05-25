@@ -1,5 +1,5 @@
 // API Configuration
-const API_URL = 'https://life-gap-fixer06.onrender.com/api';
+const API_URL = 'http://localhost:5000/api';
 
 // Check if user is logged in
 function isLoggedIn() {
